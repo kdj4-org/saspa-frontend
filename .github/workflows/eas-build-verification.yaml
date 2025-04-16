@@ -1,10 +1,10 @@
 name: EAS Build Verification
 
-on:
-  pull_request:
-    branches:
-      - main
-      - develop
+# on:
+#   pull_request:
+#     branches:
+#       - main
+#       # - develop
 
 jobs:
   android-build:
