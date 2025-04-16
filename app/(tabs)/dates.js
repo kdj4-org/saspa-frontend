@@ -5,8 +5,4 @@ export default function DatesPage() {
   return (
     <Screen>
       <ScrollView>
-        <Text className="text-black text-xl font-bold mb-6">Citas</Text>
-      </ScrollView>
-    </Screen>
-  );
-}
+        <T className="text-black text-xl font-bold mb-6">Citas</T

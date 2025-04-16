@@ -78,11 +78,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="profile"
-        options={{
-          title: "Perfil",
-          tabBarIcon: ({ focused, color }) =>
-            iconWrapper(UserIcon, focused, color),
         }}
       />
     </Tabs>

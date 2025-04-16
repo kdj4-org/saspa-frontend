@@ -6,5 +6,3 @@ export default function IndexPage() {
     <Screen>
       <Text className="text-black text-xl font-bold mb-6">Inicio</Text>
     </Screen>
-  );
-}

@@ -1,7 +1,7 @@
 import { ScrollView, Text } from "react-native";
 import { Screen } from "../../components/Screen";
 
-export default function TeamPage() {
+export default function TeamPage
   return (
     <Screen>
       <ScrollView>
