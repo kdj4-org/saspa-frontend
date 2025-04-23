@@ -31,3 +31,15 @@ export const ImageIcon = (props) => (
 export const MapPinIcon = (props) => (
   <Feather name="map-pin" size={24} color="black" {...props} />
 );
+
+export const InstagramIcon = (props) => (
+  <Feather name="instagram" size={24} color="black" {...props} />
+);
+
+export const MailIcon = (props) => (
+  <Feather name="mail" size={24} color="black" {...props} />
+);
+
+export const MessageCircleIcon = (props) => (
+  <Feather name="message-circle" size={24} color="black" {...props} />
+);
