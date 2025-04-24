@@ -68,10 +68,10 @@ export default function IndexPage() {
             </TouchableOpacity>
           </Link>
           <Link asChild href={"/login"}>
-              <TouchableOpacity style={styles.sectionButton}>
-                <Text style={styles.buttonText}>Iniciar Sesión</Text>
-              </TouchableOpacity>
-            </Link>
+            <TouchableOpacity style={styles.sectionButton}>
+              <Text style={styles.buttonText}>Iniciar Sesión</Text>
+            </TouchableOpacity>
+          </Link>
 
           {/* Enlace de registro */}
           <Text style={styles.register}>Regístrate</Text>

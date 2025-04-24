@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { Screen } from "../components/Screen";
 import { useLogin } from "../hooks/useLogin";
 import { useRouter } from "expo-router";
@@ -26,11 +32,9 @@ export default function Login() {
     if (result.success) {
       console.log("TOKEN:", result.token);
       console.log("Inicio de sesión exitoso.");
-      
       // Aquí puedes redirigir al usuario a la pantalla principal o donde desees
     }
   };
-
 
   return (
     <Screen>
@@ -55,11 +59,18 @@ export default function Login() {
           onChangeText={setContrasena}
           secureTextEntry
         />
-         {errorContrasena ? <Text style={styles.error}>{errorContrasena}</Text> : null}
-        
+        {errorContrasena ? (
+          <Text style={styles.error}>{errorContrasena}</Text>
+        ) : null}
 
-        <TouchableOpacity style={styles.button} onPress={handleLogin} disabled={loading}>
-          <Text style={styles.buttonText}>{loading ? "Cargando..." : "Inicio Sesión"}</Text>
+        <TouchableOpacity
+          style={styles.button}
+          onPress={handleLogin}
+          disabled={loading}
+        >
+          <Text style={styles.buttonText}>
+            {loading ? "Cargando..." : "Inicio Sesión"}
+          </Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -78,7 +89,6 @@ const styles = StyleSheet.create({
     marginBottom: 32,
     textAlign: "center",
     color: "#EAC696",
-    marginBottom: 200,
     paddingLeft: 8,
     paddingRight: 8,
     paddingTop: 8,
@@ -86,12 +96,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#370E49",
     borderRadius: 50,
     fontFamily: "cursive",
-    
   },
   error: { color: "red", marginBottom: 12, fontSize: 14 },
   input: {
     height: 48,
-    borderColor: "#ccc",
     borderWidth: 1,
     borderRadius: 15,
     paddingHorizontal: 12,
@@ -118,7 +126,6 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: "bolder",
-
     marginBottom: 8,
     color: "#370E49",
   },
