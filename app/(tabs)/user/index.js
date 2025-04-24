@@ -62,11 +62,16 @@ export default function IndexPage() {
           <Text style={styles.title}>¡Bienvenidos!</Text>
 
           {/* Botón de reserva */}
-          <Link asChild href={"/dates"}>
+          <Link asChild href={"/user/dates"}>
             <TouchableOpacity style={styles.button}>
               <Text style={styles.buttonText}>¡Reserva ya!</Text>
             </TouchableOpacity>
           </Link>
+          <Link asChild href={"/login"}>
+              <TouchableOpacity style={styles.sectionButton}>
+                <Text style={styles.buttonText}>Iniciar Sesión</Text>
+              </TouchableOpacity>
+            </Link>
 
           {/* Enlace de registro */}
           <Text style={styles.register}>Regístrate</Text>
