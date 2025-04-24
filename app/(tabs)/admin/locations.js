@@ -1,49 +1,70 @@
+// app/(tabs)/admin/locations.js
 import React, { useState } from "react";
-import { ScrollView, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { StyleSheet, ScrollView, Text, TouchableOpacity } from "react-native";
 import { Screen } from "../../../components/Screen";
 import Card from "../../../components/Card";
 import { Plus } from "../../../components/Icons";
 import { useSedes } from "../../../hooks/useSedes";
-import CreateSedeForm from "../../../components/CreateSedeForm";
+import SedeForm from "../../../components/SedeForm";
 import Modal from "react-native-modal";
 
 export default function AdminLocations() {
   const { sedes, loading, createSede, editSede, removeSede } = useSedes(true);
-  const [isModalVisible, setModalVisible] = useState(false);
 
-  const toggleModal = () => setModalVisible(!isModalVisible);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingSede, setEditingSede] = useState(null);
+
+  const openNew = () => {
+    setEditingSede(null);
+    setModalVisible(true);
+  };
+  const openEdit = (sede) => {
+    setEditingSede(sede);
+    setModalVisible(true);
+  };
+  const close = () => setModalVisible(false);
+
+  // onSubmit recibirá {id?, ciudad, direccion}
+  const handleSubmit = async ({ id, ciudad, direccion }) => {
+    if (id) {
+      await editSede(id, { ciudad, direccion });
+    } else {
+      await createSede({ ciudad, direccion });
+    }
+  };
 
   return (
     <Screen>
-      <ScrollView className="p-4">
-        <Text style={styles.title}>Nuestras Sedes</Text>
-        <TouchableOpacity style={styles.addButton} onPress={toggleModal}>
+      <ScrollView>
+        <Text style={styles.title}>Gestión de Sedes</Text>
+        <TouchableOpacity onPress={openNew} style={styles.addButton}>
           <Plus />
           <Text style={styles.buttonText}>Agregar Sede</Text>
         </TouchableOpacity>
 
         {loading ? (
           <Text>Cargando…</Text>
-        ) : Array.isArray(sedes) ? (
+        ) : (
           sedes.map((sede) => (
             <Card
               key={sede.id}
-              id={sede.id}
-              isAdmin={true}
-              onEdit={() => editSede(sede.id)}
+              isAdmin
+              onEdit={() => openEdit(sede)}
               onDelete={() => removeSede(sede.id)}
             >
               <Text style={{ fontWeight: "bold" }}>{sede.direccion}</Text>
               <Text>{sede.ciudad}</Text>
             </Card>
           ))
-        ) : (
-          <Text>No hay sedes disponibles.</Text>
         )}
       </ScrollView>
 
-      <Modal isVisible={isModalVisible} onBackdropPress={toggleModal}>
-        <CreateSedeForm onClose={toggleModal} onSubmit={createSede} />
+      <Modal isVisible={modalVisible} onBackdropPress={close}>
+        <SedeForm
+          initialData={editingSede}
+          onClose={close}
+          onSubmit={handleSubmit}
+        />
       </Modal>
     </Screen>
   );
