@@ -72,6 +72,9 @@ export default function Login() {
             {loading ? "Cargando..." : "Inicio Sesión"}
           </Text>
         </TouchableOpacity>
+        <TouchableOpacity onPress={() => router.push("/register")}>
+          <Text style={styles.registerLink}>¿No estás registrado?</Text>
+        </TouchableOpacity>
       </View>
     </Screen>
   );
@@ -82,6 +85,12 @@ const styles = StyleSheet.create({
     padding: 24,
     flex: 1,
     justifyContent: "center",
+  },
+  registerLink: {
+    marginTop: 20,
+    textAlign: "center",
+    color: "#370E49",
+    fontSize: 16,
   },
   title: {
     fontSize: 28,
