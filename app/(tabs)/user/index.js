@@ -10,12 +10,12 @@ import {
   Alert,
 } from "react-native";
 import { Link } from "expo-router";
-import { Screen } from "../../components/Screen";
+import { Screen } from "../../../components/Screen";
 import {
   MailIcon,
   InstagramIcon,
   MessageCircleIcon,
-} from "../../components/Icons";
+} from "../../../components/Icons";
 
 export default function IndexPage() {
   const handleMailPress = async () => {
@@ -52,7 +52,7 @@ export default function IndexPage() {
           {/* Logo */}
           <View style={styles.logoContainer}>
             <Image
-              source={require("../../assets/logo.png")}
+              source={require("../../../assets/logo.png")}
               style={styles.logo}
               resizeMode="contain"
             />
@@ -82,19 +82,19 @@ export default function IndexPage() {
           </Text>
 
           <View style={styles.buttonRow}>
-            <Link asChild href={"/team"}>
+            <Link asChild href={"/user/team"}>
               <TouchableOpacity style={styles.sectionButton}>
                 <Text style={styles.sectionText}>Nuestro equipo</Text>
               </TouchableOpacity>
             </Link>
 
-            <Link asChild href={"/locations"}>
+            <Link asChild href={"/user/locations"}>
               <TouchableOpacity style={styles.sectionButton}>
                 <Text style={styles.sectionText}>Nuestras sedes</Text>
               </TouchableOpacity>
             </Link>
 
-            <Link asChild href={"/gallery"}>
+            <Link asChild href={"/user/gallery"}>
               <TouchableOpacity style={styles.sectionButton}>
                 <Text style={styles.sectionText}>Nuestros servicios</Text>
               </TouchableOpacity>

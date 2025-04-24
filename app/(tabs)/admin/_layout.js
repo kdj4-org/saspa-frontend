@@ -7,7 +7,7 @@ import {
   ImageIcon,
   MapPinIcon,
   UserIcon,
-} from "../../components/Icons";
+} from "../../../components/Icons";
 
 export default function TabsLayout() {
   const iconWrapper = (IconComponent, focused, color) => (
