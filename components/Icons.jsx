@@ -43,3 +43,15 @@ export const MailIcon = (props) => (
 export const MessageCircleIcon = (props) => (
   <Feather name="message-circle" size={24} color="black" {...props} />
 );
+
+export const Trash2 = (props) => (
+  <Feather name="trash-2" size={24} color="black" {...props} />
+);
+
+export const Edit = (props) => (
+  <Feather name="edit" size={24} color="black" {...props} />
+);
+
+export const Plus = (props) => (
+  <Feather name="plus" size={24} color="black" {...props} />
+);
