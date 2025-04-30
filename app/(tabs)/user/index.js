@@ -67,19 +67,11 @@ export default function IndexPage() {
               <Text style={styles.buttonText}>¡Reserva ya!</Text>
             </TouchableOpacity>
           </Link>
-          <Link asChild href={"/login"}>
-            <TouchableOpacity style={styles.sectionButton}>
-              <Text style={styles.buttonText}>Iniciar Sesión</Text>
-            </TouchableOpacity>
-          </Link>
-          <Link asChild href={"/register"}>
-            <TouchableOpacity style={styles.sectionButton}>
-              <Text style={styles.buttonText}>Registrate</Text>
-            </TouchableOpacity>
-          </Link>
 
           {/* Enlace de registro */}
-          <Text style={styles.register}>Regístrate</Text>
+          <Link asChild href={"/register"}>
+            <Text style={styles.register}>Regístrate</Text>
+          </Link>
 
           {/* Secciones */}
           <Text style={styles.section}>¿Quiénes Somos?</Text>
@@ -145,84 +137,76 @@ export default function IndexPage() {
 const styles = StyleSheet.create({
   scroll: {
     flex: 1,
-    backgroundColor: "#E0BBE4", // purple-200
-    paddingHorizontal: 16, // px-4
-    paddingTop: 16, // pt-4
+    backgroundColor: "#D8BFD8",
+    paddingHorizontal: 16,
+    paddingTop: 16,
   },
   container: {
     flex: 1,
     alignItems: "center",
-    backgroundColor: "#E0BBE4",
-    paddingTop: 16, // pt-4
-    paddingBottom: 32, // py-8
+    backgroundColor: "#D8BFD8",
+    paddingTop: 16,
+    paddingBottom: 32,
   },
   logo: {
-    width: 200, // w-48
-    height: 150, // h-32
-    borderRadius: 12, // rounded-xl
-    marginVertical: 12, // mb-6
-    marginHorizontal: 60, // mb-6
+    width: 200,
+    height: 150,
+    borderRadius: 12,
+    marginVertical: 12,
+    marginHorizontal: 60,
   },
   logoContainer: {
-    backgroundColor: "#ffffff", // fondo blanco
-    padding: 20,
-    borderRadius: 16,
-    shadowColor: "#FFD700", // color dorado
-    shadowOffset: { width: 0, height: 5 },
-    shadowOpacity: 0.4,
-    shadowRadius: 10,
-    elevation: 10, // para Android
+    padding: 12,
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 16, // mb-4
   },
   title: {
-    color: "#5D3A9B", // purple-800
-    fontSize: 36, // text-4xl
-    fontWeight: "bold", // font-bold
-    marginBottom: 16, // mb-4
+    color: "#5D3A9B",
+    fontSize: 36,
+    fontWeight: "bold",
+    marginBottom: 16,
   },
   button: {
-    backgroundColor: "#FDE68A", // yellow-300
-    borderColor: "#5D3A9B", // purple-800
-    borderWidth: 2, // border-2
-    paddingVertical: 12, // py-3
-    paddingHorizontal: 32, // px-8
-    borderRadius: 999, // rounded-full
-    marginBottom: 16, // mb-4
+    backgroundColor: "#E0B6AB",
+    borderColor: "#5D3A9B",
+    borderWidth: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 999,
+    marginBottom: 16,
   },
   buttonText: {
     color: "#5D3A9B",
-    fontSize: 18, // text-lg
+    fontSize: 18,
     fontWeight: "bold",
   },
   register: {
     color: "#5D3A9B",
     textDecorationLine: "underline",
-    marginBottom: 24, // mb-6
+    marginBottom: 24,
   },
   section: {
     color: "#5D3A9B",
-    fontSize: 30, // text-3xl
-    fontWeight: "600", // font-semibold
-    marginBottom: 16, // mb-4
+    fontSize: 30,
+    fontWeight: "600",
+    marginBottom: 16,
   },
   text: {
     color: "#5D3A9B",
     fontSize: 15,
     fontWeight: "bold",
     textAlign: "center",
-    marginBottom: 24, // mb-6
+    marginBottom: 24,
   },
   sectionButton: {
-    backgroundColor: "#FDE68A", // yellow-300
-    borderColor: "#5D3A9B", // purple-800
-    borderWidth: 2, // border-2
-    paddingVertical: 12, // py-3
-    paddingHorizontal: 18, // px-6
-    borderRadius: 999, // rounded-full
-    marginVertical: 12, // mb-3
-    marginHorizontal: 12, // mb-3
+    backgroundColor: "#E0B6AB",
+    borderColor: "#5D3A9B",
+    borderWidth: 2,
+    paddingVertical: 12,
+    paddingHorizontal: 18,
+    borderRadius: 999,
+    marginVertical: 12,
+    marginHorizontal: 12,
   },
   sectionText: {
     color: "#5D3A9B",
@@ -234,7 +218,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
   },
   icon: {
-    marginHorizontal: 12, // espacio entre íconos (~space-x-6)
+    marginHorizontal: 12, // espacio entre íconos
   },
   buttonRow: {
     flexDirection: "column",
