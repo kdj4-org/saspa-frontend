@@ -21,15 +21,16 @@ jobs:
 
       - name: Generate lockfile
         run: |
-          if [ ! -f package-lock.json ]; then
-            npm install --package-lock-only
+          if [ -f package.json ]; then
+            echo "Generating package-lock.json..."
+            npm install --package-lock-only || exit 1
+          else
+            echo "Error: package.json not found. Cannot generate lockfile."
+            exit 1
           fi
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --no-audit --no-fund
 
       - name: Run Lint
-        run: node --run lint
-
-      # - name: Run Tests
-      #   run: npm run test
+        run: npm run lint
