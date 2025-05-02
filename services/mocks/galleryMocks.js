@@ -3,7 +3,7 @@ export const galleryMock = [
   {
     id: 1,
     url_imagen:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_iXyxBGFeV826IXH3r-oKsopGD9CeD9107A&s",
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQAk8_iLUibUAoLnxJs-vNe2JxpF0tlWSaHpA&s",
     fecha: "2025-04-15",
     servicioId: 1,
   },
@@ -31,7 +31,14 @@ export const galleryMock = [
   {
     id: 5,
     url_imagen:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR8eJ7pAcZJbNd9U-b9ylU9VMQcPTpMaBs2Hg&s",
+      "https://enlinea.santotomas.cl/web/wp-content/uploads/sites/2/2021/01/foto-podolog%C3%ADa.jpg",
+    fecha: "2025-04-30",
+    servicioId: 3,
+  },
+  {
+    id: 6,
+    url_imagen:
+      "https://mixcoco.co/wp-content/uploads/2023/01/POLY-GEL-GLITTER-2.jpg",
     fecha: "2025-04-30",
     servicioId: 3,
   },
