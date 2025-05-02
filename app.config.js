@@ -38,5 +38,6 @@ export default ({ config }) => ({
       projectId: "30ec88e0-53b6-4101-b55a-520fafb39f83",
     },
     API_URL: process.env.API_URL,
+    USE_MOCKS: process.env.USE_MOCKS,
   },
 });
