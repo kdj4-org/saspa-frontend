@@ -60,21 +60,13 @@ export default function Gallery() {
     <Screen>
       <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Nuestros Servicios</Text>
-        <Text style={styles.subtitle}>Ofrecemos servicios de: </Text>
-        {loadingServicios ? (
-          <Text style={styles.loading}>Cargando servicios…</Text>
-        ) : sortedServicios.length ? (
-          sortedServicios.map((servicio) => (
-            <Text key={servicio.id} style={styles.listItem}>
-              • {servicio.nombre}
-            </Text>
-          ))
-        ) : (
-          <Text style={styles.empty}>No hay servicios.</Text>
-        )}
 
-        <Text style={styles.sectionTitle}>Nuestra Galería</Text>
-        <View style={[styles.galleryWrapper, { height: CAROUSEL_HEIGHT }]}>
+        <View
+          style={[
+            styles.galleryWrapper,
+            { height: CAROUSEL_HEIGHT, marginBottom: 20 },
+          ]}
+        >
           {loadingGaleria ? (
             <Text style={styles.loading}>Cargando galería…</Text>
           ) : sortedPublicaciones.length ? (
@@ -104,6 +96,19 @@ export default function Gallery() {
           )}
         </View>
 
+        <Text style={styles.serviceSubtitle}>Ofrecemos servicios de: </Text>
+        {loadingServicios ? (
+          <Text style={styles.loading}>Cargando servicios…</Text>
+        ) : sortedServicios.length ? (
+          sortedServicios.map((servicio) => (
+            <Text key={servicio.id} style={styles.serviceItem}>
+              • {servicio.nombre}
+            </Text>
+          ))
+        ) : (
+          <Text style={styles.empty}>No hay servicios.</Text>
+        )}
+
         {selectedImage && (
           <View style={styles.fullscreenOverlay}>
             <Image
@@ -127,34 +132,33 @@ export default function Gallery() {
 const styles = StyleSheet.create({
   container: { padding: 16 },
   title: {
-    fontSize: 32,
+    fontSize: 30, // Texto principal más pequeño
     fontWeight: "bold",
+    textAlign: "center",
+    color: PURPLE,
+    marginTop: 0,
     marginBottom: 16,
-    textAlign: "center",
-    color: PURPLE,
   },
-  subtitle: { fontSize: 18, marginBottom: 8, color: PURPLE },
-  sectionTitle: {
-    fontSize: 24,
+  serviceSubtitle: {
+    fontSize: 16,
+    marginBottom: 8,
+    color: PURPLE,
     fontWeight: "bold",
-    marginTop: 24,
-    marginBottom: 12,
-    color: PURPLE,
-    textAlign: "center",
   },
+  serviceItem: { fontSize: 14, marginBottom: 4, color: PURPLE },
   loading: { textAlign: "center", marginTop: 20 },
   empty: { textAlign: "center", marginTop: 20, color: "#888" },
-  listItem: { fontSize: 16, marginBottom: 4, color: PURPLE },
   galleryWrapper: {
     width: CAROUSEL_WIDTH,
     borderRadius: 10,
     backgroundColor: PURPLE,
     overflow: "hidden",
-    marginTop: 16,
+    marginTop: 8,
     alignSelf: "center",
     height: CAROUSEL_HEIGHT,
     padding: 8,
     justifyContent: "center",
+    marginBottom: 20, // Margen inferior para la galería
   },
   carouselItem: {
     height: "100%",
