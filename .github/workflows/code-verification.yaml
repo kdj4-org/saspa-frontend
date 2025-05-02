@@ -19,7 +19,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Generate lockfile if missing
+      - name: Generate lockfile
         run: |
           if [ ! -f package-lock.json ]; then
             npm install --package-lock-only
