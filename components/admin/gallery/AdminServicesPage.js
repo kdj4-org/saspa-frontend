@@ -21,7 +21,8 @@ const AdminServicesPage = () => {
   const [searchText, setSearchText] = useState("");
   const [isServiceModalVisible, setServiceModalVisible] = useState(false);
   const [selectedService, setSelectedService] = useState(null);
-  const [newService, setNewService] = useState({
+
+  const [modalForm, setModalForm] = useState({
     nombre: "",
     descripcion: "",
     duracion_minutos: "",
@@ -52,35 +53,43 @@ const AdminServicesPage = () => {
     setFilteredServices(filtered);
   }, [searchText, services]);
 
+  useEffect(() => {
+    console.log("Selected service:", selectedService);
+    if (selectedService) {
+      setModalForm({
+        nombre: selectedService.nombre || "",
+        descripcion: selectedService.descripcion || "",
+        duracion_minutos: selectedService.duracion_minutos?.toString() || "",
+        precio: selectedService.precio?.toString() || "",
+      });
+    } else {
+      setModalForm({
+        nombre: "",
+        descripcion: "",
+        duracion_minutos: "",
+        precio: "",
+      });
+    }
+  }, [selectedService]);
+
   const openServiceModal = (item = null) => {
     setSelectedService(item);
-    setNewService({
-      nombre: item?.nombre || "",
-      descripcion: item?.descripcion || "",
-      duracion_minutos: item?.duracion_minutos?.toString() || "",
-      precio: item?.precio?.toString() || "",
-    });
     setServiceModalVisible(true);
   };
 
   const closeServiceModal = () => {
     setServiceModalVisible(false);
     setSelectedService(null);
-    setNewService({
-      nombre: "",
-      descripcion: "",
-      duracion_minutos: "",
-      precio: "",
-    });
   };
 
   const handleCreateService = async () => {
+    console.log("Intentando crear el servicio con:", modalForm);
     try {
       const payload = {
-        nombre: newService.nombre,
-        descripcion: newService.descripcion,
-        duracion_minutos: parseInt(newService.duracion_minutos, 10),
-        precio: parseFloat(newService.precio),
+        nombre: modalForm.nombre,
+        descripcion: modalForm.descripcion,
+        duracion_minutos: parseInt(modalForm.duracion_minutos, 10),
+        precio: parseFloat(modalForm.precio),
       };
       await crearServicio(payload);
       Alert.alert("Éxito", "Servicio creado correctamente.");
@@ -91,17 +100,21 @@ const AdminServicesPage = () => {
   };
 
   const handleUpdateService = async () => {
-    console.log("Intentando actualizar el servicio");
+    console.log(
+      "Intentando actualizar el servicio:",
+      selectedService?.id,
+      modalForm
+    );
     if (!selectedService?.id) {
       Alert.alert("Error", "No se seleccionó ningún servicio para actualizar.");
       return;
     }
     try {
       const payload = {
-        nombre: newService.nombre,
-        descripcion: newService.descripcion,
-        duracion_minutos: parseInt(newService.duracion_minutos, 10),
-        precio: parseFloat(newService.precio),
+        nombre: modalForm.nombre,
+        descripcion: modalForm.descripcion,
+        duracion_minutos: parseInt(modalForm.duracion_minutos, 10),
+        precio: parseFloat(modalForm.precio),
       };
       await editarServicio(selectedService.id, payload);
       Alert.alert("Éxito", "Servicio actualizado correctamente.");
@@ -134,7 +147,7 @@ const AdminServicesPage = () => {
   };
 
   const handleServiceInputChange = (name, value) => {
-    setNewService({ ...newService, [name]: value });
+    setModalForm({ ...modalForm, [name]: value });
   };
 
   return (
@@ -152,7 +165,7 @@ const AdminServicesPage = () => {
           styles.addButton,
           { backgroundColor: COLORS.purple.middle.hex },
         ]}
-        onPress={openServiceModal}
+        onPress={() => openServiceModal(null)}
       >
         <Text style={styles.buttonText}>Agregar Nuevo Servicio</Text>
       </TouchableOpacity>
@@ -177,7 +190,7 @@ const AdminServicesPage = () => {
         isVisible={isServiceModalVisible}
         onClose={closeServiceModal}
         onSubmit={selectedService ? handleUpdateService : handleCreateService}
-        newItem={newService}
+        newItem={modalForm}
         onInputChange={handleServiceInputChange}
       />
       <ConfirmationModal
