@@ -3,40 +3,41 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../../../config/Colors";
 
-const AdminGalleryItem = ({ item, onEdit, onDelete }) => (
-  <View style={styles.listItem}>
-    <View style={styles.row}>
-      <View style={styles.imageContainer}>
-        <Image source={{ uri: item.url_imagen }} style={styles.thumbnail} />
+const AdminGalleryItem = ({ item, onEdit, onDelete }) => {
+  const handleEdit = () => {
+    onEdit(item);
+  };
+
+  const handleDelete = () => {
+    onDelete(item.id);
+  };
+
+  return (
+    <View style={styles.listItem}>
+      <View style={styles.row}>
+        <View style={styles.imageContainer}>
+          <Image source={{ uri: item.url_imagen }} style={styles.thumbnail} />
+        </View>
+        <View style={styles.infoContainer}>
+          {/* <Text>ID: {item.id}</Text> */}
+          <Text>Fecha: {item.fecha}</Text>
+          <Text>Servicio ID: {item.servicioId}</Text>
+        </View>
       </View>
-      <View style={styles.infoContainer}>
-        {/* <Text>ID: {item.id}</Text> */}
-        <Text>Fecha: {item.fecha}</Text>
-        <Text>Servicio ID: {item.servicioId}</Text>
+      <View style={styles.actionButtons}>
+        <TouchableOpacity
+          style={[
+            styles.deleteButton,
+            { backgroundColor: COLORS.purple.text.hex },
+          ]}
+          onPress={handleDelete}
+        >
+          <Text style={styles.buttonText}>Eliminar</Text>
+        </TouchableOpacity>
       </View>
     </View>
-    <View style={styles.actionButtons}>
-      <TouchableOpacity
-        style={[
-          styles.editButton,
-          { backgroundColor: COLORS.purple.middle.hex },
-        ]}
-        onPress={() => onEdit(item)}
-      >
-        <Text style={styles.buttonText}>Editar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={[
-          styles.deleteButton,
-          { backgroundColor: COLORS.purple.text.hex },
-        ]}
-        onPress={() => onDelete(item.id)}
-      >
-        <Text style={styles.buttonText}>Eliminar</Text>
-      </TouchableOpacity>
-    </View>
-  </View>
-);
+  );
+};
 
 const styles = StyleSheet.create({
   listItem: {
@@ -50,11 +51,11 @@ const styles = StyleSheet.create({
   },
   row: {
     flexDirection: "row",
-    alignItems: "center", // Align image and info vertically in the middle
-    marginBottom: 8, // Space between the image/info row and the buttons
+    alignItems: "center",
+    marginBottom: 8,
   },
   imageContainer: {
-    marginRight: 16, // Space between image and info
+    marginRight: 16,
   },
   thumbnail: {
     width: 100,
@@ -62,7 +63,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   infoContainer: {
-    flexShrink: 1, // Allows the info container to shrink if needed
+    flexShrink: 1,
   },
   actionButtons: {
     flexDirection: "row",

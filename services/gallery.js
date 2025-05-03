@@ -21,6 +21,6 @@ export const fetchPublicaciones = () => {
 export const createPublicacion = (payload) =>
   api.post("/admin/publicaciones", payload);
 
-// DELETE /admin/publicaciones/:publicacionId
-export const deletePublicacion = (publicacionId) =>
-  api.delete(`/admin/publicaciones/${publicacionId}`);
+// DELETE /admin/publicaciones/:id
+export const deletePublicacion = (id) =>
+  api.delete(`/admin/publicaciones/${id}`);

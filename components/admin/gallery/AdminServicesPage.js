@@ -1,28 +1,19 @@
 // components/admin/gallery/AdminServicesPage.js
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   FlatList,
   StyleSheet,
   TouchableOpacity,
-  Alert, // Ya no se usa directamente para la confirmación
+  Alert,
   TextInput,
 } from "react-native";
-import {
-  fetchServicios,
-  createServicio,
-  updateServicio,
-  deleteServicio,
-} from "../../../services/services";
-import { useStorage } from "../../../hooks/useStorage";
+import { useServicios } from "../../../hooks/useServicios";
 import AdminServiceItem from "./AdminServiceItem";
 import AdminServiceModal from "./AdminServiceModal";
 import { COLORS } from "../../../config/Colors";
-import Constants from "expo-constants";
 import ConfirmationModal from "../../ui/ConfirmationModal";
-
-const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS === "true";
 
 const AdminServicesPage = () => {
   const [services, setServices] = useState([]);
@@ -39,35 +30,19 @@ const AdminServicesPage = () => {
   const [isConfirmationModalVisible, setConfirmationModalVisible] =
     useState(false);
   const [itemToDeleteId, setItemToDeleteId] = useState(null);
-  const { getItem: getToken } = useStorage("adminToken");
-
-  const loadServices = useCallback(async () => {
-    const token = await getToken();
-    if (!token && !USE_MOCKS) {
-      Alert.alert("Error", "No se encontró el token de administrador.");
-      return;
-    }
-    try {
-      const response = await fetchServicios({
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response?.data) {
-        setServices(response.data);
-      } else {
-        console.error("Error fetching services:", response);
-        Alert.alert("Error", "No se pudieron cargar los servicios.");
-      }
-    } catch (error) {
-      console.error("Error fetching services:", error);
-      Alert.alert("Error", "Ocurrió un error al cargar los servicios.");
-    }
-  }, [getToken]);
+  const {
+    servicios: fetchedServices,
+    loading,
+    crearServicio,
+    editarServicio,
+    eliminarServicio,
+  } = useServicios();
 
   useEffect(() => {
-    loadServices();
-  }, [loadServices]);
+    if (!loading) {
+      setServices(fetchedServices);
+    }
+  }, [fetchedServices, loading]);
 
   useEffect(() => {
     const lowerSearchText = searchText.toLowerCase();
@@ -100,11 +75,6 @@ const AdminServicesPage = () => {
   };
 
   const handleCreateService = async () => {
-    const token = await getToken();
-    if (!token && !USE_MOCKS) {
-      Alert.alert("Error", "No se encontró el token de administrador.");
-      return;
-    }
     try {
       const payload = {
         nombre: newService.nombre,
@@ -112,31 +82,16 @@ const AdminServicesPage = () => {
         duracion_minutos: parseInt(newService.duracion_minutos, 10),
         precio: parseFloat(newService.precio),
       };
-      const response = await createServicio(payload, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response?.mensaje) {
-        Alert.alert("Éxito", response.mensaje);
-        loadServices();
-        closeServiceModal();
-      } else {
-        Alert.alert("Error", "No se pudo crear el servicio.");
-      }
+      await crearServicio(payload);
+      Alert.alert("Éxito", "Servicio creado correctamente.");
+      closeServiceModal();
     } catch (error) {
-      console.error("Error creating service:", error);
       Alert.alert("Error", "Ocurrió un error al crear el servicio.");
     }
   };
 
   const handleUpdateService = async () => {
-    const token = await getToken();
-    if (!token && !USE_MOCKS) {
-      Alert.alert("Error", "No se encontró el token de administrador.");
-      return;
-    }
+    console.log("Intentando actualizar el servicio");
     if (!selectedService?.id) {
       Alert.alert("Error", "No se seleccionó ningún servicio para actualizar.");
       return;
@@ -148,21 +103,10 @@ const AdminServicesPage = () => {
         duracion_minutos: parseInt(newService.duracion_minutos, 10),
         precio: parseFloat(newService.precio),
       };
-      const response = await updateServicio(selectedService.id, payload, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response?.mensaje) {
-        Alert.alert("Éxito", response.mensaje);
-        loadServices();
-        closeServiceModal();
-      } else {
-        Alert.alert("Error", "No se pudo actualizar el servicio.");
-      }
+      await editarServicio(selectedService.id, payload);
+      Alert.alert("Éxito", "Servicio actualizado correctamente.");
+      closeServiceModal();
     } catch (error) {
-      console.error("Error updating service:", error);
       Alert.alert("Error", "Ocurrió un error al actualizar el servicio.");
     }
   };
@@ -176,25 +120,10 @@ const AdminServicesPage = () => {
     setConfirmationModalVisible(false);
     const idToDelete = itemToDeleteId;
     setItemToDeleteId(null);
-    const token = await getToken();
-    if (!token && !USE_MOCKS) {
-      Alert.alert("Error", "No se encontró el token de administrador.");
-      return;
-    }
     try {
-      const response = await deleteServicio(idToDelete, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      if (response?.mensaje) {
-        Alert.alert("Éxito", response.mensaje);
-        loadServices();
-      } else {
-        Alert.alert("Error", "No se pudo eliminar el servicio.");
-      }
+      await eliminarServicio(idToDelete);
+      Alert.alert("Éxito", "Servicio eliminado correctamente.");
     } catch (error) {
-      console.error("Error deleting service:", error);
       Alert.alert("Error", "Ocurrió un error al eliminar el servicio.");
     }
   };
@@ -227,17 +156,23 @@ const AdminServicesPage = () => {
       >
         <Text style={styles.buttonText}>Agregar Nuevo Servicio</Text>
       </TouchableOpacity>
-      <FlatList
-        data={filteredServices}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={({ item }) => (
-          <AdminServiceItem
-            item={item}
-            onEdit={openServiceModal}
-            onDelete={confirmDeleteService} // Usa la nueva función para confirmar
-          />
-        )}
-      />
+      {loading ? (
+        <Text style={{ textAlign: "center", marginTop: 20 }}>
+          Cargando servicios...
+        </Text>
+      ) : (
+        <FlatList
+          data={filteredServices}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={({ item }) => (
+            <AdminServiceItem
+              item={item}
+              onEdit={() => openServiceModal(item)}
+              onDelete={confirmDeleteService}
+            />
+          )}
+        />
+      )}
       <AdminServiceModal
         isVisible={isServiceModalVisible}
         onClose={closeServiceModal}

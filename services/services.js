@@ -1,21 +1,18 @@
 // services/servicios.js
 import { api } from "./api";
 import Constants from "expo-constants";
-import { servicesMock as mockServicios } from "./mocks/servicesMock";
+import { servicesMock } from "./mocks/servicesMock";
 
-const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS;
+const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS === "true";
 
 // ===== USER =====
 
 // GET /usuario/servicios
 export const fetchServicios = () => {
   if (USE_MOCKS) {
-    return new Promise((resolve) => {
-      setTimeout(() => {
-        resolve({ data: mockServicios });
-      }, 500);
-    });
+    return Promise.resolve({ data: servicesMock });
   }
+  console.log("Configuracion de la peticion", api.defaults);
   return api.get("/usuario/servicios");
 };
 

@@ -12,7 +12,7 @@ export function useGaleria() {
       const res = await galeria.fetchPublicaciones();
       setPublicaciones(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("error cargando publicaciones de la galería", err);
+      console.error("Error cargando publicaciones de la galería", err);
       setPublicaciones([]);
     } finally {
       setLoading(false);
@@ -25,6 +25,7 @@ export function useGaleria() {
       await loadPublicaciones();
     } catch (error) {
       console.error("Error al agregar publicación:", error);
+      throw error;
     }
   };
 
@@ -34,6 +35,7 @@ export function useGaleria() {
       await loadPublicaciones();
     } catch (error) {
       console.error("Error al eliminar publicación:", error);
+      throw error;
     }
   };
 
@@ -41,5 +43,10 @@ export function useGaleria() {
     loadPublicaciones();
   }, [loadPublicaciones]);
 
-  return { publicaciones, loading, agregarPublicacion, eliminarPublicacion };
+  return {
+    publicaciones,
+    loading,
+    agregarPublicacion,
+    eliminarPublicacion,
+  };
 }

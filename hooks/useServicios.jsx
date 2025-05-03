@@ -2,43 +2,65 @@
 import { useState, useEffect, useCallback } from "react";
 import * as servicio from "../services/services";
 
-export function useServicios(isAdmin) {
+export function useServicios() {
   const [servicios, setServicios] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = isAdmin
-        ? await servicio.fetchServicios()
-        : await servicio.fetchServicios();
+      const res = await servicio.fetchServicios();
       setServicios(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("error cargando servicios", err);
+      console.error("Error cargando servicios", err);
       setServicios([]);
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, []);
 
-  const crearServicio = async (data) => {
-    await servicio.createServicio(data);
-    await load();
-  };
+  const crearServicio = useCallback(
+    async (data) => {
+      try {
+        await servicio.createServicio(data);
+        await load();
+      } catch (error) {
+        console.error("Error creando servicio:", error);
+        throw error;
+      }
+    },
+    [load]
+  );
 
-  const editarServicio = async (id, data) => {
-    await servicio.updateServicio(id, data);
-    await load();
-  };
+  const editarServicio = useCallback(
+    async (id, data) => {
+      try {
+        await servicio.updateServicio(id, data);
+        await load();
+      } catch (error) {
+        console.error("Error editando servicio:", error);
+        throw error;
+      }
+    },
+    [load]
+  );
 
-  const eliminarServicio = async (id) => {
-    await servicio.deleteServicio(id);
-    await load();
-  };
+  const eliminarServicio = useCallback(
+    async (id) => {
+      try {
+        await servicio.deleteServicio(id);
+        await load();
+      } catch (error) {
+        console.error("Error eliminando servicio:", error);
+        throw error;
+      }
+    },
+    [load]
+  );
 
   useEffect(() => {
     load();
-  }, [isAdmin, load]);
+  }, [load]);
 
   return {
     servicios,
