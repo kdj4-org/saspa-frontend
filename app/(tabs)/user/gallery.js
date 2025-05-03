@@ -21,7 +21,7 @@ const CLOSE_BUTTON_SIZE = 30;
 const PURPLE = "#5D3A9B";
 
 export default function Gallery() {
-  const { servicios, loading: loadingServicios } = useServicios(false);
+  const { servicios, loading: loadingServicios } = useServicios();
   const { publicaciones, loading: loadingGaleria } = useGaleria();
   const [selectedImage, setSelectedImage] = useState(null);
   const [sortedPublicaciones, setSortedPublicaciones] = useState([]);
@@ -92,7 +92,11 @@ export default function Gallery() {
               ))}
             </ScrollView>
           ) : (
-            <Text style={styles.empty}>No hay imágenes.</Text>
+            <>
+              <Text style={styles.empty}>
+                No se ha podido cargar las imágenes.
+              </Text>
+            </>
           )}
         </View>
 
@@ -106,7 +110,9 @@ export default function Gallery() {
             </Text>
           ))
         ) : (
-          <Text style={styles.empty}>No hay servicios.</Text>
+          <Text style={styles.empty}>
+            No se ha podido cargar los servicios. Intente más tarde.
+          </Text>
         )}
 
         {selectedImage && (
