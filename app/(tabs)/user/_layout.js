@@ -9,7 +9,7 @@ import {
   UserIcon,
 } from "../../../components/Icons";
 
-export default function TabsLayout() {
+export default function TabsUserLayout() {
   const iconWrapper = (IconComponent, focused, color) => (
     <View
       style={{
