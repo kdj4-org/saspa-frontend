@@ -7,140 +7,123 @@ import {
   StyleSheet,
 } from "react-native";
 import { Screen } from "../components/Screen";
+import { useAuth } from "../context/authContext";
 import { useRouter } from "expo-router";
-import { useRegister } from "../hooks/useRegister"; // Asegúrate de crear este hook
+import { validateFields } from "../utils/validations";
 
 export default function Register() {
   const router = useRouter();
-  const [nombre, setNombre] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [telefono, setTelefono] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [confirmarContrasena, setConfirmarContrasena] = useState("");
+  const { register } = useAuth();
 
-  const [errorNombre, setErrorNombre] = useState("");
-  const [errorCorreo, setErrorCorreo] = useState("");
-  const [errorTelefono, setErrorTelefono] = useState("");
-  const [errorContrasena, setErrorContrasena] = useState("");
-  const [errorConfirmarContrasena, setErrorConfirmarContrasena] = useState("");
-  const [errorGeneral, setErrorGeneral] = useState("");
-
-  const { register, loading, error } = useRegister(); // Custom hook para la lógica de registro
-
-  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-  const validarTelefono = (telefono) => /^\d+$/.test(telefono); // Simple validación numérica
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    rol: "cliente",
+    phone: "",
+    password: "",
+    confirm: "",
+  });
+  const [errors, setErrors] = useState({});
 
   const handleRegister = async () => {
-    setErrorNombre("");
-    setErrorCorreo("");
-    setErrorTelefono("");
-    setErrorContrasena("");
-    setErrorConfirmarContrasena("");
-    setErrorGeneral("");
-
-    if (!nombre) return setErrorNombre("El nombre es obligatorio.");
-    if (!correo) return setErrorCorreo("El correo es obligatorio.");
-    if (!validarEmail(correo)) return setErrorCorreo("Correo no válido.");
-    if (!telefono) return setErrorTelefono("El teléfono es obligatorio.");
-    if (!validarTelefono(telefono))
-      return setErrorTelefono("Teléfono no válido.");
-    if (!contrasena) return setErrorContrasena("La contraseña es obligatoria.");
-    if (!confirmarContrasena)
-      return setErrorConfirmarContrasena("Debes confirmar la contraseña.");
-    if (contrasena !== confirmarContrasena)
-      return setErrorConfirmarContrasena("Las contraseñas no coinciden.");
-
-    const result = await register({
-      name: nombre,
-      email: correo,
-      phone: telefono,
-      password: contrasena,
-    });
-
-    if (result?.success) {
-      console.log("Usuario registrado exitosamente:", result.data);
-      // Aquí puedes redirigir al usuario a la pantalla de inicio de sesión o mostrar un mensaje de éxito
-      router.push("/login"); // Ejemplo de redirección
-    } else {
-      setErrorGeneral(result?.error || "Error al registrar el usuario.");
+    const newErrors = validateFields(form);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
+    try {
+      await register({
+        nombre: form.name,
+        rol: form.rol,
+        email: form.email,
+        password: form.password,
+        telefono: form.phone,
+      });
+      router.push("/user");
+    } catch (err) {
+      setErrors({
+        ...errors,
+        sameEmail: err.response?.data?.email
+          ? "El correo ya existe"
+          : undefined,
+        samePhone: err.response?.data?.telefono
+          ? "El teléfono ya existe"
+          : undefined,
+        general: err.response?.data?.message || "Error al registrar",
+      });
+    }
+  };
+
+  const onChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+    setErrors({ ...errors, [key]: undefined });
   };
 
   return (
     <Screen>
       <View style={styles.container}>
         <Text style={styles.title}>Registro</Text>
+        {errors.general && <Text style={styles.error}>{errors.general}</Text>}
 
-        <Text style={styles.subtitle}>Nombre</Text>
+        <Text style={styles.subtitle}>Nombre:</Text>
         <TextInput
           style={styles.input}
           placeholder="Nombre"
-          value={nombre}
-          onChangeText={setNombre}
+          value={form.name}
+          onChangeText={(val) => onChange("name", val)}
         />
-        {errorNombre ? <Text style={styles.error}>{errorNombre}</Text> : null}
+        {errors.name && <Text style={styles.error}>{errors.name}</Text>}
 
-        <Text style={styles.subtitle}>Correo</Text>
+        <Text style={styles.subtitle}>Correo:</Text>
         <TextInput
           style={styles.input}
           placeholder="Correo electrónico"
-          value={correo}
-          onChangeText={setCorreo}
           keyboardType="email-address"
-          autoCapitalize="none"
+          value={form.email}
+          onChangeText={(val) => onChange("email", val)}
         />
-        {errorCorreo ? <Text style={styles.error}>{errorCorreo}</Text> : null}
+        {(errors.email || errors.sameEmail) && (
+          <Text style={styles.error}>{errors.email || errors.sameEmail}</Text>
+        )}
 
-        <Text style={styles.subtitle}>Teléfono</Text>
+        <Text style={styles.subtitle}>Teléfono:</Text>
         <TextInput
           style={styles.input}
           placeholder="Número de teléfono"
-          value={telefono}
-          onChangeText={setTelefono}
           keyboardType="phone-pad"
+          value={form.phone}
+          onChangeText={(val) => onChange("phone", val)}
         />
-        {errorTelefono ? (
-          <Text style={styles.error}>{errorTelefono}</Text>
-        ) : null}
+        {(errors.phone || errors.samePhone) && (
+          <Text style={styles.error}>{errors.phone || errors.samePhone}</Text>
+        )}
 
-        <Text style={styles.subtitle}>Contraseña</Text>
+        <Text style={styles.subtitle}>Contraseña:</Text>
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
-          value={contrasena}
-          onChangeText={setContrasena}
           secureTextEntry
+          value={form.password}
+          onChangeText={(val) => onChange("password", val)}
         />
-        {errorContrasena ? (
-          <Text style={styles.error}>{errorContrasena}</Text>
-        ) : null}
+        {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
-        <Text style={styles.subtitle}>Confirmar contraseña</Text>
+        <Text style={styles.subtitle}>Confirmar contraseña:</Text>
         <TextInput
           style={styles.input}
           placeholder="Confirmar contraseña"
-          value={confirmarContrasena}
-          onChangeText={setConfirmarContrasena}
           secureTextEntry
+          value={form.confirm}
+          onChangeText={(val) => onChange("confirm", val)}
         />
-        {errorConfirmarContrasena ? (
-          <Text style={styles.error}>{errorConfirmarContrasena}</Text>
-        ) : null}
+        {errors.confirm && <Text style={styles.error}>{errors.confirm}</Text>}
 
-        {errorGeneral ? <Text style={styles.error}>{errorGeneral}</Text> : null}
-
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleRegister}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Registrando..." : "Registrarse"}
-          </Text>
+        <TouchableOpacity style={styles.button} onPress={handleRegister}>
+          <Text style={styles.buttonText}>Registrarse</Text>
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/login")}>
-          <Text style={styles.loginLink}>¿Ya tienes cuenta?</Text>
+          <Text style={styles.textLogin}>¿Ya tienes cuenta? Inicia sesión</Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -148,61 +131,49 @@ export default function Register() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    flex: 1,
-    justifyContent: "center",
-  },
+  container: { padding: 16, flex: 1 },
   title: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: "bold",
-    marginBottom: 32,
+    color: "#5D3A9B",
     textAlign: "center",
-    color: "#EAC696",
-    paddingLeft: 8,
-    paddingRight: 8,
-    paddingTop: 8,
-    paddingBottom: 8,
-    backgroundColor: "#370E49",
-    borderRadius: 50,
-    fontFamily: "cursive",
+    marginBottom: 16,
   },
-  error: { color: "red", marginBottom: 12, fontSize: 14 },
+  error: { color: "red", fontSize: 14, marginBottom: 8 },
   input: {
     height: 48,
     borderWidth: 1,
     borderRadius: 15,
     paddingHorizontal: 12,
-    marginBottom: 16,
+    marginBottom: 4,
     backgroundColor: "#9F71B3",
     borderColor: "#370E49",
   },
   button: {
-    backgroundColor: "#EAC696",
-    padding: 16,
-    borderRadius: 30,
-    alignItems: "center",
-    marginTop: 12,
-    borderWidth: 5,
-    borderColor: "#370E49",
-    alignSelf: "center",
+    backgroundColor: "#E0B6AB",
+    borderColor: "#5D3A9B",
+    borderWidth: 2,
+    padding: 12,
+    borderRadius: 999,
+    marginVertical: 12,
+    marginHorizontal: 90,
   },
   buttonText: {
-    color: "#370E49",
+    color: "#5D3A9B",
+    fontSize: 15,
     fontWeight: "bold",
-    fontSize: 16,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: "bolder",
-    marginBottom: 8,
+    fontSize: 15,
+    fontWeight: "bold",
     color: "#370E49",
+    marginTop: 12,
   },
-  loginLink: {
-    marginTop: 20,
-    textAlign: "center",
+  textLogin: {
+    fontSize: 15,
+    fontWeight: "bold",
     color: "#370E49",
-    fontSize: 16,
+    textAlign: "center",
   },
 });

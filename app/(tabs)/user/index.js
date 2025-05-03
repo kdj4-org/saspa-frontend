@@ -68,11 +68,6 @@ export default function IndexPage() {
             </TouchableOpacity>
           </Link>
 
-          {/* Enlace de registro */}
-          <Link asChild href={"/register"}>
-            <Text style={styles.register}>Regístrate</Text>
-          </Link>
-
           {/* Secciones */}
           <Text style={styles.section}>¿Quiénes Somos?</Text>
           <Text style={styles.text}>
