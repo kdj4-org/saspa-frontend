@@ -3,11 +3,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../../../config/Colors";
 
-const AdminGalleryItem = ({ item, onEdit, onDelete }) => {
-  const handleEdit = () => {
-    onEdit(item);
-  };
-
+const AdminGalleryItem = ({ item, onDelete }) => {
   const handleDelete = () => {
     onDelete(item.id);
   };

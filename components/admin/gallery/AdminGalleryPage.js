@@ -50,6 +50,7 @@ const AdminGalleryPage = () => {
   };
 
   const handleCreateGalleryItem = async () => {
+    console.log("Intentando crear la publicación con:", newGalleryItem);
     try {
       const payload = {
         ...newGalleryItem,
@@ -69,6 +70,7 @@ const AdminGalleryPage = () => {
   };
 
   const handleDeleteGalleryItem = async () => {
+    console.log("Intentando eliminar la publicación con id:", itemToDeleteId);
     setConfirmationModalVisible(false);
     const idToDelete = itemToDeleteId;
     setItemToDeleteId(null);
