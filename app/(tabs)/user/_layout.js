@@ -8,8 +8,9 @@ import {
   MapPinIcon,
   UserIcon,
 } from "../../../components/Icons";
+import withAuth from "../../../utils/withAuth";
 
-export default function TabsUserLayout() {
+function TabsUserLayout() {
   const iconWrapper = (IconComponent, focused, color) => (
     <View
       style={{
@@ -88,3 +89,10 @@ export default function TabsUserLayout() {
     </Tabs>
   );
 }
+
+// Envolvemos el layout de cliente con withAuth para asegurar que solo usuarios con rol 'cliente' accedan
+export default withAuth(TabsUserLayout, {
+  authorizedRoles: ["cliente"],
+  requireAuth: true,
+  redirectTo: "/login",
+});

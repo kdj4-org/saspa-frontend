@@ -35,3 +35,14 @@ export function validateFields(form) {
 
   return errs;
 }
+
+export function validateLogin(form) {
+  const errs = {};
+  if (!emailRegex.test(form.email)) {
+    errs.email = "Ingresa un correo válido.";
+  }
+  if (!form.password) {
+    errs.password = "La contraseña es obligatoria.";
+  }
+  return errs;
+}
