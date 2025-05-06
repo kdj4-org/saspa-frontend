@@ -7,73 +7,92 @@ import {
   StyleSheet,
 } from "react-native";
 import { Screen } from "../components/Screen";
-import { useLogin } from "../hooks/useLogin";
+import { useAuth } from "../context/authContext";
 import { useRouter } from "expo-router";
+import { validateLogin } from "../utils/validations";
 
-export default function Login() {
+export default function Register() {
   const router = useRouter();
-  const [correo, setCorreo] = useState("");
-  const [contrasena, setContrasena] = useState("");
-  const [errorCorreo, setErrorCorreo] = useState("");
-  const [errorContrasena, setErrorContrasena] = useState("");
-  const { login, loading, error } = useLogin();
+  const { login } = useAuth();
 
-  const validarEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  const [form, setForm] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
+
   const handleLogin = async () => {
-    setErrorCorreo("");
-    setErrorContrasena("");
-
-    if (!correo) return setErrorCorreo("El correo es obligatorio.");
-    if (!validarEmail(correo)) return setErrorCorreo("Correo no válido.");
-    if (!contrasena) return setErrorContrasena("Contraseña obligatoria.");
-
-    const result = await login({ email: correo, password: contrasena });
-
-    if (result.success) {
-      console.log("TOKEN:", result.token);
-      console.log("Inicio de sesión exitoso.");
-      // Aquí puedes redirigir al usuario a la pantalla principal o donde desees
+    const newErrors = validateLogin(form);
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
     }
+    try {
+      const usr = await login({ email: form.email, password: form.password });
+      const rol = usr?.rol;
+
+      console.log("Usuario logueado:", usr);
+      console.log("Rol del usuario:", rol);
+
+      if (rol === "admin") {
+        router.replace("/admin");
+      } else {
+        router.replace("/user");
+      }
+    } catch (err) {
+      const resp = err.response;
+      const data = resp?.data || {};
+      // Mapear errores específicos de login
+      setErrors({
+        general: data.message ?? "Error al iniciar sesión",
+        email:
+          data.message === "User not found" || resp?.status === 404
+            ? "Correo no registrado"
+            : undefined,
+        password:
+          data.message === "Incorrect password" || resp?.status === 401
+            ? "Contraseña incorrecta"
+            : undefined,
+      });
+    }
+  };
+
+  const onChange = (key, value) => {
+    setForm({ ...form, [key]: value });
+    setErrors({ ...errors, [key]: undefined, general: undefined });
   };
 
   return (
     <Screen>
       <View style={styles.container}>
-        <Text style={styles.title}>Iniciar Sesión</Text>
+        <Text style={styles.title}>Inicio de sesión</Text>
+        {errors.general && <Text style={styles.error}>{errors.general}</Text>}
 
-        <Text style={styles.subtitle}>Correo/Teléfono</Text>
+        <Text style={styles.subtitle}>Correo:</Text>
         <TextInput
           style={styles.input}
-          placeholder="Correo/Teléfono"
-          value={correo}
-          onChangeText={setCorreo}
+          placeholder="Correo electrónico"
           keyboardType="email-address"
-          autoCapitalize="none"
+          value={form.email}
+          onChangeText={(val) => onChange("email", val)}
         />
-        {errorCorreo ? <Text style={styles.error}>{errorCorreo}</Text> : null}
-        <Text style={styles.subtitle}>Contraseña</Text>
+        {(errors.email || errors.sameEmail) && (
+          <Text style={styles.error}>{errors.email || errors.sameEmail}</Text>
+        )}
+
+        <Text style={styles.subtitle}>Contraseña:</Text>
         <TextInput
           style={styles.input}
           placeholder="Contraseña"
-          value={contrasena}
-          onChangeText={setContrasena}
           secureTextEntry
+          value={form.password}
+          onChangeText={(val) => onChange("password", val)}
         />
-        {errorContrasena ? (
-          <Text style={styles.error}>{errorContrasena}</Text>
-        ) : null}
+        {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
-        <TouchableOpacity
-          style={styles.button}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          <Text style={styles.buttonText}>
-            {loading ? "Cargando..." : "Inicio Sesión"}
-          </Text>
+        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+          <Text style={styles.buttonText}>Iniciar sesión</Text>
         </TouchableOpacity>
+
         <TouchableOpacity onPress={() => router.push("/register")}>
-          <Text style={styles.registerLink}>¿No estás registrado?</Text>
+          <Text style={styles.textRegister}>¿No tienes cuenta? Registrate</Text>
         </TouchableOpacity>
       </View>
     </Screen>
@@ -81,61 +100,51 @@ export default function Login() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    padding: 24,
-    flex: 1,
-    justifyContent: "center",
-  },
-  registerLink: {
-    marginTop: 20,
-    textAlign: "center",
-    color: "#370E49",
-    fontSize: 16,
-  },
+  container: { padding: 16, flex: 1 },
   title: {
-    fontSize: 28,
+    fontSize: 36,
     fontWeight: "bold",
-    marginBottom: 32,
+    color: "#5D3A9B",
     textAlign: "center",
-    color: "#EAC696",
-    paddingLeft: 8,
-    paddingRight: 8,
-    paddingTop: 8,
-    paddingBottom: 8,
-    backgroundColor: "#370E49",
-    borderRadius: 50,
-    fontFamily: "cursive",
+    marginBottom: 120,
+    marginTop: 50,
   },
-  error: { color: "red", marginBottom: 12, fontSize: 14 },
+  error: { color: "red", fontSize: 14, marginBottom: 8 },
   input: {
     height: 48,
     borderWidth: 1,
     borderRadius: 15,
     paddingHorizontal: 12,
-    marginBottom: 16,
+    marginBottom: 4,
     backgroundColor: "#9F71B3",
     borderColor: "#370E49",
   },
   button: {
-    backgroundColor: "#EAC696",
-    padding: 16,
-    borderRadius: 30,
-    alignItems: "center",
-    marginTop: 12,
-    borderWidth: 5,
-    borderColor: "#370E49",
-    alignSelf: "center",
+    backgroundColor: "#E0B6AB",
+    borderColor: "#5D3A9B",
+    borderWidth: 2,
+    padding: 12,
+    borderRadius: 999,
+    marginTop: 80,
+    marginBottom: 12,
+    marginHorizontal: 90,
   },
   buttonText: {
-    color: "#370E49",
+    color: "#5D3A9B",
+    fontSize: 15,
     fontWeight: "bold",
-    fontSize: 16,
     textAlign: "center",
   },
   subtitle: {
-    fontSize: 18,
-    fontWeight: "bolder",
-    marginBottom: 8,
+    fontSize: 15,
+    fontWeight: "bold",
     color: "#370E49",
+    marginTop: 12,
+  },
+  textRegister: {
+    fontSize: 15,
+    fontWeight: "bold",
+    color: "#370E49",
+    textAlign: "center",
   },
 });
