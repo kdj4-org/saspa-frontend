@@ -8,28 +8,27 @@ const API_URL = Constants.expoConfig.extra.API_URL;
 export const api = axios.create({
   baseURL: API_URL,
   timeout: 10000,
-  headers: {
-    "Content-Type": "application/json",
-  },
 });
 
+// Este interceptor se dispara antes de cada petición
 api.interceptors.request.use(
   async (config) => {
-    const needsAuth = !config.url.includes("/usuario/");
+    // Obtengo el token
+    const token = await getToken();
 
-    if (needsAuth) {
-      const token = await getToken();
-      if (token) {
-        config.headers.Authorization = `${token}`; // Inyecta el token, NO es necesario el "Bearer"
-      }
-      console.log("Verification header added");
-    } else {
-      delete config.headers;
-      console.log("Headers cleaned");
+    // Reinicio a cero todos los headers
+    config.headers = {};
+
+    // Siempre quiero JSON
+    config.headers["Content-Type"] = "application/json";
+    config.headers["Accept"] = "application/json";
+
+    // Si la ruta no es pública, inyecto el access token
+    if (!config.url.startsWith("/usuario/") && token) {
+      config.headers["Authorization"] = `${token}`;
     }
+
     return config;
   },
-  (error) => {
-    return Promise.reject(error); // Retorna error si por ejemplo el token no es válido
-  }
+  (error) => Promise.reject(error)
 );
