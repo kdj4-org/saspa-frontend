@@ -8,8 +8,9 @@ import {
   MapPinIcon,
   UserIcon,
 } from "../../../components/Icons";
+import withAuth from "../../../utils/withAuth";
 
-export default function TabsAdminLayout() {
+function TabsAdminLayout() {
   const iconWrapper = (IconComponent, focused, color) => (
     <View
       style={{
@@ -88,3 +89,9 @@ export default function TabsAdminLayout() {
     </Tabs>
   );
 }
+
+export default withAuth(TabsAdminLayout, {
+  authorizedRoles: ["admin"],
+  requireAuth: true,
+  redirectTo: "/login",
+});
