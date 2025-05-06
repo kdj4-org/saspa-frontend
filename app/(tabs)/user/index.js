@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   View,
   Image,
@@ -16,8 +16,15 @@ import {
   InstagramIcon,
   MessageCircleIcon,
 } from "../../../components/Icons";
+import { useAuth } from "../../../context/authContext";
 
 export default function IndexPage() {
+  const { user } = useAuth();
+
+  useEffect(() => {
+    console.log("User:", user);
+  }, [user]);
+
   const handleMailPress = async () => {
     const email = "angelicamariaayalamondragon@gmail.com";
     const subject = "Consulta desde la app";
