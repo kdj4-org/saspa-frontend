@@ -1,7 +1,7 @@
-// src/context/authContext.jsx
+// src/context/authContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
+import { getToken, setToken, removeToken } from "../utils/asyncStorage";
 import { api } from "../services/api";
-import { setToken, getToken, removeToken } from "../utils/asyncStorage";
 
 const AuthContext = createContext();
 
@@ -12,9 +12,9 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const loadUser = async () => {
       try {
-        const token = getToken("token");
+        const token = await getToken();
         if (token) {
-          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          api.defaults.headers.common["access"] = `Bearer ${token}`;
           setUser({ token });
         }
       } catch (error) {
@@ -29,11 +29,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (credentials) => {
     try {
-      const res = await api.post("/usuario/login", credentials);
-      const { token, user } = res.data;
-      setToken("token");
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const res = await api.post("/usuario/login/", credentials);
+      const { Authorization: token, user } = res.data;
+
+      if (!token) {
+        throw new Error("Token no recibido");
+      }
+
+      await setToken(token);
+      api.defaults.headers.common["access"] = `Bearer ${token}`;
       setUser(user);
+      return user;
     } catch (error) {
       throw error;
     }
@@ -41,20 +47,25 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (data) => {
     try {
-      delete api.defaults.headers.common["Authorization"];
       const res = await api.post("/cliente/registrar/", data);
-      const { token, user } = res.data;
-      setToken("token");
-      api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const { Authorization: token, user } = res.data;
+
+      if (!token) {
+        throw new Error("Token no recibido");
+      }
+
+      await setToken(token);
+      api.defaults.headers.common["access"] = `Bearer ${token}`;
       setUser(user);
+      return user;
     } catch (error) {
       throw error;
     }
   };
 
   const logout = async () => {
-    removeToken("token");
-    delete api.defaults.headers.common["Authorization"];
+    await removeToken();
+    delete api.defaults.headers.common["access"];
     setUser(null);
   };
 

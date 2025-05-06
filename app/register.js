@@ -26,6 +26,8 @@ export default function Register() {
   const [errors, setErrors] = useState({});
 
   const handleRegister = async () => {
+    setErrors({});
+
     const newErrors = validateFields(form);
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
@@ -41,6 +43,7 @@ export default function Register() {
       });
       router.push("/user");
     } catch (err) {
+      console.log("Error al registrar:", err.message, err.response?.data, err);
       setErrors({
         ...errors,
         sameEmail: err.response?.data?.email
@@ -81,6 +84,7 @@ export default function Register() {
           keyboardType="email-address"
           value={form.email}
           onChangeText={(val) => onChange("email", val)}
+          autoCapitalize="none"
         />
         {(errors.email || errors.sameEmail) && (
           <Text style={styles.error}>{errors.email || errors.sameEmail}</Text>
