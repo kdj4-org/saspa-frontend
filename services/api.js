@@ -22,8 +22,8 @@ api.interceptors.request.use(async (config) => {
   config.headers["Content-Type"] = "application/json";
   config.headers["Accept"] = "application/json";
 
-  if (token) {
-    config.headers["access"] = `Bearer ${token}`;
+  if (!config.url.startsWith("/usuario/") && token) {
+    config.headers["Authorization"] = `Bearer ${token}`;
   }
   return config;
 });
