@@ -1,49 +1,156 @@
-// app/(tabs)/client/locations.js
-import React from "react";
-import { ScrollView, Text, StyleSheet, View } from "react-native";
+// src/screens/user/SedesScreen.js
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  View,
+  Text,
+  StyleSheet,
+  FlatList,
+  Image,
+  TouchableOpacity,
+  Dimensions,
+} from "react-native";
 import { Screen } from "../../../components/Screen";
-import Card from "../../../components/Card";
 import { useSedes } from "../../../hooks/useSedes";
+import { COLORS } from "../../../config/Colors";
 
-export default function ClientLocations() {
-  // isAdmin = false → usa GET /usuario/sedes
-  const { sedes, loading } = useSedes(false);
+const { width: screenWidth } = Dimensions.get("window");
+const CARD_WIDTH = screenWidth * 0.9;
+const CARD_HEIGHT = 180;
+
+export default function SedesScreen() {
+  const { sedes, loading } = useSedes();
+  const [sorted, setSorted] = useState([]);
+  const [selectedImage, setSelectedImage] = useState(null);
+
+  useEffect(() => {
+    if (sedes) {
+      setSorted([...sedes].sort((a, b) => a.ciudad.localeCompare(b.ciudad)));
+    }
+  }, [sedes]);
+
+  const openImage = useCallback((url) => setSelectedImage(url), []);
+  const closeImage = useCallback(() => setSelectedImage(null), []);
+
+  const renderItem = ({ item }) => (
+    <View style={styles.card}>
+      {item.url_imagen && (
+        <TouchableOpacity onPress={() => openImage(item.url_imagen)}>
+          <Image source={{ uri: item.url_imagen }} style={styles.image} />
+        </TouchableOpacity>
+      )}
+      <View style={styles.info}>
+        <Text style={styles.title}>{item.barrio || "—"}</Text>
+        <Text>Dirección: {item.direccion}</Text>
+        <Text>Ciudad: {item.ciudad}</Text>
+        <Text>Horario: {item.horario || "—"}</Text>
+      </View>
+    </View>
+  );
 
   return (
     <Screen>
-      <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>Nuestras Sedes</Text>
-        {loading ? (
+      <View style={styles.headerWrapper}>
+        <Text style={styles.header}>Nuestras Sedes</Text>
+      </View>
+
+      {loading ? (
+        <View style={styles.loadingWrapper}>
           <Text style={styles.loading}>Cargando sedes…</Text>
-        ) : Array.isArray(sedes) && sedes.length > 0 ? (
-          sedes.map((sede) => (
-            <Card key={sede.id} isAdmin={false}>
-              <View style={styles.info}>
-                <Text style={styles.direccion}>{sede.direccion}</Text>
-                <Text style={styles.ciudad}>{sede.ciudad}</Text>
-              </View>
-            </Card>
-          ))
-        ) : (
-          <Text style={styles.empty}>No hay sedes disponibles.</Text>
-        )}
-      </ScrollView>
+        </View>
+      ) : (
+        <FlatList
+          data={sorted}
+          keyExtractor={(i) => i.id.toString()}
+          renderItem={renderItem}
+          contentContainerStyle={styles.listContainer}
+          ListEmptyComponent={
+            <Text style={styles.empty}>No hay sedes disponibles.</Text>
+          }
+        />
+      )}
+
+      {selectedImage && (
+        <View style={styles.overlay}>
+          <Image
+            source={{ uri: selectedImage }}
+            style={styles.fullImage}
+            resizeMode="contain"
+          />
+          <TouchableOpacity style={styles.close} onPress={closeImage}>
+            <Text style={styles.closeText}>X</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  container: { padding: 16 },
-  title: {
-    fontSize: 32,
+  headerWrapper: {
+    padding: 16,
+    backgroundColor: COLORS.purple.background.hex,
+    marginTop: 12,
+  },
+  header: {
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 16,
     textAlign: "center",
     color: "#5D3A9B",
   },
+  loadingWrapper: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 16,
+  },
   loading: { textAlign: "center", marginTop: 20 },
+  listContainer: { padding: 16, paddingBottom: 40 },
   empty: { textAlign: "center", marginTop: 20, color: "#888" },
-  info: { marginVertical: 8 },
-  direccion: { fontSize: 18, fontWeight: "600" },
-  ciudad: { fontSize: 16, color: "#555" },
+  card: {
+    width: CARD_WIDTH,
+    height: CARD_HEIGHT,
+    backgroundColor: "#fff",
+    borderRadius: 8,
+    marginBottom: 12,
+    overflow: "hidden",
+    alignSelf: "center",
+    borderWidth: 1,
+    borderColor: "#ddd",
+  },
+  image: {
+    width: "100%",
+    height: CARD_HEIGHT * 0.5,
+  },
+  info: {
+    padding: 8,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 4,
+  },
+  overlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(93,58,155,0.9)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  fullImage: {
+    width: "90%",
+    height: "70%",
+  },
+  close: {
+    position: "absolute",
+    top: 40,
+    right: 20,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    borderRadius: 15,
+    padding: 5,
+  },
+  closeText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
 });
