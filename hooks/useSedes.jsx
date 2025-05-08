@@ -1,45 +1,72 @@
-// src/hooks/useSedes.js
+// src/hooks/useSedes.jsx
 import { useState, useEffect, useCallback } from "react";
-import * as location from "../services/locations";
+import * as sedeService from "../services/locations";
 
-export function useSedes(isAdmin) {
+export function useSedes() {
   const [sedes, setSedes] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      // 👇 Elige el endpoint correcto
-      const res = isAdmin
-        ? await location.fetchSedesAdmin()
-        : await location.fetchSedes();
+      const res = await sedeService.fetchSedes();
       setSedes(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
-      console.error("error cargando sedes", err);
+      console.error("Error cargando sedes", err);
       setSedes([]);
     } finally {
       setLoading(false);
     }
-  }, [isAdmin]);
+  }, []);
 
-  const createSede = async (data) => {
-    await location.createSede(data);
-    await load();
-  };
+  const crearSede = useCallback(
+    async (data) => {
+      try {
+        await sedeService.createSede(data);
+        await load();
+      } catch (error) {
+        console.error("Error creando sede:", error);
+        throw error;
+      }
+    },
+    [load],
+  );
 
-  const editSede = async (id, data) => {
-    await location.updateSede(id, data);
-    await load();
-  };
+  const editarSede = useCallback(
+    async (id, data) => {
+      try {
+        await sedeService.updateSede(id, data);
+        await load();
+      } catch (error) {
+        console.error("Error editando sede:", error);
+        throw error;
+      }
+    },
+    [load],
+  );
 
-  const removeSede = async (id) => {
-    await location.deleteSede(id);
-    await load();
-  };
+  const eliminarSede = useCallback(
+    async (id) => {
+      try {
+        await sedeService.deleteSede(id);
+        await load();
+      } catch (error) {
+        console.error("Error eliminando sede:", error);
+        throw error;
+      }
+    },
+    [load],
+  );
 
   useEffect(() => {
     load();
-  }, [isAdmin, load]);
+  }, [load]);
 
-  return { sedes, loading, createSede, editSede, removeSede };
+  return {
+    sedes,
+    loading,
+    crearSede,
+    editarSede,
+    eliminarSede,
+  };
 }
