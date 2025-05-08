@@ -23,7 +23,7 @@ api.interceptors.request.use(async (config) => {
   config.headers["Accept"] = "application/json";
 
   if (!config.url.startsWith("/usuario/") && token) {
-    config.headers["Authorization"] = `Bearer ${token}`;
+    config.headers["Authorization"] = `${token}`;
   }
   return config;
 });

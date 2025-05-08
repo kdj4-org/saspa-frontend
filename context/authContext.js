@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = await getToken();
         if (token) {
-          api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+          api.defaults.headers.common["Authorization"] = `${token}`;
           const user = jwtDecode(token);
           setUser(user);
         }
@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) throw new Error("Token no recibido");
 
     await setToken(token);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    api.defaults.headers.common["Authorization"] = `${token}`;
 
     const user = jwtDecode(token);
     setUser(user);
@@ -50,7 +50,7 @@ export const AuthProvider = ({ children }) => {
     if (!token) throw new Error("Token no recibido");
 
     await setToken(token);
-    api.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+    api.defaults.headers.common["Authorization"] = `${token}`;
 
     const user = jwtDecode(token);
     setUser(user);
