@@ -48,7 +48,7 @@ const AdminServicesPage = () => {
   useEffect(() => {
     const lowerSearchText = searchText.toLowerCase();
     const filtered = services.filter((service) =>
-      service.nombre.toLowerCase().includes(lowerSearchText)
+      service.nombre.toLowerCase().includes(lowerSearchText),
     );
     setFilteredServices(filtered);
   }, [searchText, services]);
@@ -103,7 +103,7 @@ const AdminServicesPage = () => {
     console.log(
       "Intentando actualizar el servicio:",
       selectedService?.id,
-      modalForm
+      modalForm,
     );
     if (!selectedService?.id) {
       Alert.alert("Error", "No se seleccionó ningún servicio para actualizar.");

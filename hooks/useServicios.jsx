@@ -29,7 +29,7 @@ export function useServicios() {
         throw error;
       }
     },
-    [load]
+    [load],
   );
 
   const editarServicio = useCallback(
@@ -42,7 +42,7 @@ export function useServicios() {
         throw error;
       }
     },
-    [load]
+    [load],
   );
 
   const eliminarServicio = useCallback(
@@ -55,7 +55,7 @@ export function useServicios() {
         throw error;
       }
     },
-    [load]
+    [load],
   );
 
   useEffect(() => {
