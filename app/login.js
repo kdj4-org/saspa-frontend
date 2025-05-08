@@ -11,7 +11,7 @@ import { useAuth } from "../context/authContext";
 import { useRouter } from "expo-router";
 import { validateLogin } from "../utils/validations";
 
-export default function Register() {
+export default function Login() {
   const router = useRouter();
   const { login } = useAuth();
 
@@ -39,6 +39,10 @@ export default function Register() {
     } catch (err) {
       const resp = err.response;
       const data = resp?.data || {};
+      console.log("Error al iniciar sesión:", data);
+      console.log("Código de error:", resp?.response);
+      console.log("Código de estado:", resp?.status);
+      console.log("Error:", err.message);
       // Mapear errores específicos de login
       setErrors({
         general: data.message ?? "Error al iniciar sesión",

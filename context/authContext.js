@@ -1,6 +1,7 @@
 // src/context/authContext.js
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getToken, setToken, removeToken } from "../utils/asyncStorage";
+import { jwtDecode } from "jwt-decode";
 import { api } from "../services/api";
 
 const AuthContext = createContext();
@@ -14,8 +15,9 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = await getToken();
         if (token) {
-          api.defaults.headers.common["access"] = `Bearer ${token}`;
-          setUser({ token });
+          api.defaults.headers.common["Authorization"] = `${token}`;
+          const user = jwtDecode(token);
+          setUser(user);
         }
       } catch (error) {
         console.log("Error cargando usuario:", error);
@@ -28,44 +30,36 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const login = async (credentials) => {
-    try {
-      const res = await api.post("/usuario/login/", credentials);
-      const { Authorization: token, user } = res.data;
+    const res = await api.post("/usuario/login/", credentials);
+    console.log("Respuesta de login:", res.data);
 
-      if (!token) {
-        throw new Error("Token no recibido");
-      }
+    const { Authorization: token } = res.data;
+    if (!token) throw new Error("Token no recibido");
 
-      await setToken(token);
-      api.defaults.headers.common["access"] = `Bearer ${token}`;
-      setUser(user);
-      return user;
-    } catch (error) {
-      throw error;
-    }
+    await setToken(token);
+    api.defaults.headers.common["Authorization"] = `${token}`;
+
+    const user = jwtDecode(token);
+    setUser(user);
+    return user;
   };
 
   const register = async (data) => {
-    try {
-      const res = await api.post("/cliente/registrar/", data);
-      const { Authorization: token, user } = res.data;
+    const res = await api.post("/cliente/registrar/", data);
+    const { Authorization: token } = res.data;
+    if (!token) throw new Error("Token no recibido");
 
-      if (!token) {
-        throw new Error("Token no recibido");
-      }
+    await setToken(token);
+    api.defaults.headers.common["Authorization"] = `${token}`;
 
-      await setToken(token);
-      api.defaults.headers.common["access"] = `Bearer ${token}`;
-      setUser(user);
-      return user;
-    } catch (error) {
-      throw error;
-    }
+    const user = jwtDecode(token);
+    setUser(user);
+    return user;
   };
 
   const logout = async () => {
     await removeToken();
-    delete api.defaults.headers.common["access"];
+    delete api.defaults.headers.common["Authorization"];
     setUser(null);
   };
 
