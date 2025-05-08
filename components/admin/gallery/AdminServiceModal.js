@@ -84,7 +84,7 @@ const AdminServiceModal = ({
       setIsValid(false);
       Alert.alert(
         "Error de validación",
-        "Por favor, corrige los errores en los campos."
+        "Por favor, corrige los errores en los campos.",
       );
     }
   };

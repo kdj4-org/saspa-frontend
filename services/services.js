@@ -13,18 +13,18 @@ export const fetchServicios = () => {
     return Promise.resolve({ data: servicesMock });
   }
   console.log("Configuracion de la peticion", api.defaults);
-  return api.get("/usuario/servicios");
+  return api.get("/usuario/servicios/");
 };
 
 // ===== ADMIN =====
 
 // POST /admin/servicios
 export const createServicio = (payload) =>
-  api.post("/admin/servicios", payload);
+  api.post("/admin/servicios/", payload);
 
 // PUT /admin/servicios/:id
 export const updateServicio = (id, payload) =>
-  api.put(`/admin/servicios/${id}`, payload);
+  api.put(`/admin/servicios/${id}/`, payload);
 
 // DELETE /admin/servicios/:id
-export const deleteServicio = (id) => api.delete(`/admin/servicios/${id}`);
+export const deleteServicio = (id) => api.delete(`/admin/servicios/${id}/`);

@@ -32,8 +32,8 @@ export default function Gallery() {
       setSortedPublicaciones(
         [...publicaciones].sort(
           (a, b) =>
-            new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion)
-        )
+            new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion),
+        ),
       );
     } else {
       setSortedPublicaciones([]);
@@ -43,7 +43,7 @@ export default function Gallery() {
   useEffect(() => {
     if (servicios?.length) {
       setSortedServicios(
-        [...servicios].sort((a, b) => a.nombre.localeCompare(b.nombre))
+        [...servicios].sort((a, b) => a.nombre.localeCompare(b.nombre)),
       );
     } else {
       setSortedServicios([]);
@@ -52,7 +52,7 @@ export default function Gallery() {
 
   const handleImagePress = useCallback(
     (imageUrl) => setSelectedImage(imageUrl),
-    []
+    [],
   );
   const handleClosePreview = useCallback(() => setSelectedImage(null), []);
 
