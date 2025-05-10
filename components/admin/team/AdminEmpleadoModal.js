@@ -8,10 +8,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import { useSedes } from "../../../hooks/useSedes";
 import { COLORS } from "../../../config/Colors";
+import { subirImagen } from "../../../services/images";
+import * as ImagePicker from "expo-image-picker";
 
 const AdminEmpleadoModal = ({
   isVisible,
@@ -42,6 +45,31 @@ const AdminEmpleadoModal = ({
       Alert.alert("Errores de validación", "Revisa los campos resaltados.");
     } else {
       onSubmit();
+    }
+  };
+
+  const seleccionarImagen = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      try {
+        const archivo = result.assets[0];
+        const res = await subirImagen(archivo);
+
+        if (res.data?.filePath) {
+          onInputChange("url_foto", res.data.filePath);
+          Alert.alert("Éxito", "Imagen subida correctamente.");
+        } else {
+          throw new Error("No se recibió URL de la imagen");
+        }
+      } catch (err) {
+        console.error("Error subiendo imagen", err);
+        Alert.alert("Error", "No se pudo subir la imagen.");
+      }
     }
   };
 
@@ -86,14 +114,18 @@ const AdminEmpleadoModal = ({
           </View>
           {errors.sede && <Text style={styles.error}>{errors.sede}</Text>}
 
-          <Text style={styles.label}>URL Foto</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.url_foto}
-            onChangeText={(t) =>
-              onInputChange("url_foto", t.trim() === "" ? null : t)
-            }
-          />
+          <Text style={styles.label}>Foto</Text>
+          <TouchableOpacity
+            onPress={seleccionarImagen}
+            style={styles.imagePicker}
+          >
+            <Text style={{ color: "#fff", textAlign: "center" }}>
+              Seleccionar desde galería
+            </Text>
+          </TouchableOpacity>
+          {formData.url_foto && (
+            <Image source={{ uri: formData.url_foto }} style={styles.image} />
+          )}
 
           <View style={styles.buttons}>
             <TouchableOpacity style={styles.cancel} onPress={onClose}>
@@ -175,6 +207,18 @@ const styles = StyleSheet.create({
   btnText: {
     color: "#fff",
     textAlign: "center",
+  },
+  imagePicker: {
+    backgroundColor: COLORS.purple.middle.hex,
+    padding: 10,
+    borderRadius: 5,
+    marginTop: 8,
+  },
+  image: {
+    width: "100%",
+    height: 150,
+    marginTop: 8,
+    borderRadius: 6,
   },
 });
 
