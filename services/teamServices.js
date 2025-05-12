@@ -3,8 +3,7 @@ import { api } from "./api";
 import Constants from "expo-constants";
 import { serviciosVinculadosMock } from "./mocks/teamServicesMocks";
 
-// const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS === "true";
-const USE_MOCKS = true;
+const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS === "true";
 
 // GET /usuario/empleados/{empleadoId}/servicios/
 export const fetchServiciosVinculados = (empleadoId) => {
