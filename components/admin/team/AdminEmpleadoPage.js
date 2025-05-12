@@ -1,4 +1,3 @@
-// components/admin/team/AdminEmpleadosPage.js
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -13,6 +12,7 @@ import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useSedes } from "../../../hooks/useSedes";
 import AdminEmpleadoItem from "./AdminEmpleadoItem";
 import AdminEmpleadoModal from "./AdminEmpleadoModal";
+import AdminEmpleadoServiciosModal from "./AdminEmpleadoServiciosModal";
 import ConfirmationModal from "../../ui/ConfirmationModal";
 import { COLORS } from "../../../config/Colors";
 
@@ -37,6 +37,9 @@ const AdminEmpleadosPage = () => {
   });
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [toDelete, setToDelete] = useState(null);
+  const [serviciosModalVisible, setServiciosModalVisible] = useState(false);
+  const [selectedEmpleadoId, setSelectedEmpleadoId] = useState(null);
+  const [selectedEmpleadoNombre, setSelectedEmpleadoNombre] = useState("");
 
   useEffect(() => {
     const enriched = empleados.map((e) => ({
@@ -111,6 +114,18 @@ const AdminEmpleadosPage = () => {
 
   const onChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
 
+  const openServiciosModal = (empleado) => {
+    setSelectedEmpleadoId(empleado.id);
+    setSelectedEmpleadoNombre(empleado.nombre);
+    setServiciosModalVisible(true);
+  };
+
+  const closeServiciosModal = () => {
+    setSelectedEmpleadoId(null);
+    setSelectedEmpleadoNombre("");
+    setServiciosModalVisible(false);
+  };
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -137,6 +152,7 @@ const AdminEmpleadosPage = () => {
               item={{ ...item, sede: item.sedeObj }}
               onEdit={() => openModal(item)}
               onDelete={confirmDelete}
+              onServicios={openServiciosModal}
             />
           )}
         />
@@ -156,6 +172,13 @@ const AdminEmpleadosPage = () => {
         onClose={() => setConfirmVisible(false)}
         onConfirm={doDelete}
         message="¿Eliminar este empleado?"
+      />
+
+      <AdminEmpleadoServiciosModal
+        isVisible={serviciosModalVisible}
+        onClose={closeServiciosModal}
+        empleadoId={selectedEmpleadoId}
+        empleadoNombre={selectedEmpleadoNombre}
       />
     </View>
   );
