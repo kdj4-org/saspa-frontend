@@ -1,9 +1,8 @@
-// components/admin/team/AdminEmpleadoItem.js
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../../../config/Colors";
 
-const AdminEmpleadoItem = ({ item, onEdit, onDelete }) => {
+const AdminEmpleadoItem = ({ item, onEdit, onDelete, onServicios }) => {
   return (
     <View style={styles.card}>
       {item.url_foto ? (
@@ -14,6 +13,12 @@ const AdminEmpleadoItem = ({ item, onEdit, onDelete }) => {
         <Text style={styles.text}>Sede: {item.sede?.barrio || "-"}</Text>
       </View>
       <View style={styles.actions}>
+        <TouchableOpacity
+          style={[styles.btn, styles.servicios]}
+          onPress={() => onServicios(item)}
+        >
+          <Text style={styles.btnText}>Servicios</Text>
+        </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btn, styles.edit]}
           onPress={() => onEdit(item)}
@@ -60,6 +65,9 @@ const styles = StyleSheet.create({
     padding: 8,
     borderRadius: 5,
     marginLeft: 8,
+  },
+  servicios: {
+    backgroundColor: COLORS.purple.middle.hex,
   },
   edit: {
     backgroundColor: COLORS.purple.middle.hex,
