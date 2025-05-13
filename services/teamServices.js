@@ -7,7 +7,6 @@ const USE_MOCKS = Constants.expoConfig.extra.USE_MOCKS === "true";
 
 // GET /usuario/empleados/{empleadoId}/servicios/
 export const fetchServiciosVinculados = (empleadoId) => {
-  console.log("Empleado ID", empleadoId);
   if (USE_MOCKS) {
     return Promise.resolve({
       data: serviciosVinculadosMock.filter(
