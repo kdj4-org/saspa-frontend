@@ -93,7 +93,7 @@ const AdminGalleryModal = ({
 
   const handleOnSubmit = () => {
     const dateErrorMessage = validateDate(newItem.fecha);
-    const serviceIdErrorMessage = validateServiceId(newItem.servicioId);
+    const serviceIdErrorMessage = validateServiceId(newItem.servicio_id);
 
     setDateError(dateErrorMessage);
     setServiceIdError(serviceIdErrorMessage);
@@ -161,8 +161,8 @@ const AdminGalleryModal = ({
             style={[styles.pickerWrapper, serviceIdError && styles.inputError]}
           >
             <Picker
-              selectedValue={newItem.servicioId}
-              onValueChange={(value) => onInputChange("servicioId", value)}
+              selectedValue={newItem.servicio_id}
+              onValueChange={(value) => onInputChange("servicio_id", value)}
             >
               <Picker.Item label="Seleccione un servicio..." value={null} />
               {servicios.map((servicio) => (

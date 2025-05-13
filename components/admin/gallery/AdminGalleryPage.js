@@ -20,7 +20,7 @@ const AdminGalleryPage = () => {
   const [newGalleryItem, setNewGalleryItem] = useState({
     url_imagen: "",
     fecha: "",
-    servicioId: "",
+    servicio_id: "",
   });
   const [isConfirmationModalVisible, setConfirmationModalVisible] =
     useState(false);
@@ -38,7 +38,7 @@ const AdminGalleryPage = () => {
     setNewGalleryItem({
       url_imagen: item?.url_imagen || "",
       fecha: item?.fecha || "",
-      servicioId: item?.servicioId?.toString() || "",
+      servicio_id: item?.servicio_id?.toString() || "",
     });
     setGalleryModalVisible(true);
   };
@@ -46,7 +46,7 @@ const AdminGalleryPage = () => {
   const closeGalleryModal = () => {
     setGalleryModalVisible(false);
     setSelectedGalleryItem(null);
-    setNewGalleryItem({ url_imagen: "", fecha: "", servicioId: "" });
+    setNewGalleryItem({ url_imagen: "", fecha: "", servicio_id: "" });
   };
 
   const handleCreateGalleryItem = async () => {
@@ -54,7 +54,7 @@ const AdminGalleryPage = () => {
     try {
       const payload = {
         ...newGalleryItem,
-        servicioId: parseInt(newGalleryItem.servicioId, 10),
+        servicio_id: parseInt(newGalleryItem.servicio_id, 10),
       };
       await createPublicacion(payload);
       Alert.alert("Éxito", "Publicación creada correctamente.");
