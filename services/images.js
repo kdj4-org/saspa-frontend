@@ -1,16 +1,30 @@
 // services/images.js
+import * as FileSystem from "expo-file-system";
 import { api } from "./api";
 
 export const subirImagen = async (imagen) => {
-  const formData = new FormData();
-
-  formData.append("image", {
-    uri: imagen.uri,
-    type: imagen.type || "image/jpeg",
-    name: imagen.fileName || "imagen.jpg",
+  const base64 = await FileSystem.readAsStringAsync(imagen.uri, {
+    encoding: FileSystem.EncodingType.Base64,
   });
 
-  console.log("Subiendo imagen:", formData);
+  const extension = imagen.uri.split(".").pop().toLowerCase();
+  const mime =
+    {
+      jpg: "image/jpeg",
+      jpeg: "image/jpeg",
+      png: "image/png",
+      gif: "image/gif",
+      bmp: "image/bmp",
+      webp: "image/webp",
+    }[extension] || "image/jpeg";
 
-  return api.post("/admin/subir-imagen/", formData);
+  const payload = {
+    filename: imagen.fileName || imagen.name || "imagen.jpg",
+    data: `data:${mime};base64,${base64}`,
+  };
+
+  console.log("Subiendo imagen:", payload.filename);
+
+  const response = await api.post("/admin/subir-imagen/", payload);
+  return response.data;
 };
