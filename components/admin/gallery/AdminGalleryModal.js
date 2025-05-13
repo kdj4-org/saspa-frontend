@@ -7,8 +7,13 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
+  Image,
 } from "react-native";
 import { COLORS } from "../../../config/Colors";
+import { subirImagen } from "../../../services/images";
+import * as ImagePicker from "expo-image-picker";
+import { Picker } from "@react-native-picker/picker";
+import { useServicios } from "../../../hooks/useServicios";
 
 const AdminGalleryModal = ({
   isVisible,
@@ -22,6 +27,7 @@ const AdminGalleryModal = ({
   const [dateError, setDateError] = useState("");
   const [serviceIdError, setServiceIdError] = useState("");
   const [isValid, setIsValid] = useState(true);
+  const { servicios } = useServicios();
 
   useEffect(() => {
     setUrlError("");
@@ -30,16 +36,29 @@ const AdminGalleryModal = ({
     setIsValid(true);
   }, [newItem]);
 
-  const validateURL = (url) => {
-    if (!url.trim()) {
-      return "La URL de la imagen es requerida.";
+  const seleccionarImagen = async () => {
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ["images"],
+      allowsEditing: true,
+      quality: 0.8,
+    });
+
+    if (!result.canceled) {
+      try {
+        const archivo = result.assets[0];
+        const res = await subirImagen(archivo);
+
+        if (res.filePath) {
+          onInputChange("url_imagen", res.filePath);
+          Alert.alert("Éxito", "Imagen subida correctamente.");
+        } else {
+          throw new Error("No se recibió URL de la imagen");
+        }
+      } catch (err) {
+        console.error("Error subiendo imagen", err);
+        Alert.alert("Error", "No se pudo subir la imagen.");
+      }
     }
-    // Simple check for a valid URL format (can be improved)
-    const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
-    if (!urlRegex.test(url)) {
-      return "Por favor, introduce una URL válida.";
-    }
-    return "";
   };
 
   const validateDate = (date) => {
@@ -66,25 +85,26 @@ const AdminGalleryModal = ({
   };
 
   const validateServiceId = (id) => {
-    if (!id.trim()) {
-      return "El ID del servicio es requerido.";
-    }
-    if (isNaN(parseInt(id, 10))) {
-      return "El ID del servicio debe ser un número.";
+    if (!id) {
+      return "El servicio es requerido.";
     }
     return "";
   };
 
   const handleOnSubmit = () => {
-    const urlErrorMessage = validateURL(newItem.url_imagen);
     const dateErrorMessage = validateDate(newItem.fecha);
     const serviceIdErrorMessage = validateServiceId(newItem.servicioId);
 
-    setUrlError(urlErrorMessage);
     setDateError(dateErrorMessage);
     setServiceIdError(serviceIdErrorMessage);
 
-    if (!urlErrorMessage && !dateErrorMessage && !serviceIdErrorMessage) {
+    if (!newItem.url_imagen) {
+      setUrlError("La imagen es requerida.");
+    } else {
+      setUrlError("");
+    }
+
+    if (!urlError && !dateErrorMessage && !serviceIdErrorMessage) {
       setIsValid(true);
       onSubmit();
     } else {
@@ -109,12 +129,16 @@ const AdminGalleryModal = ({
             {selectedItem ? "Editar Publicación" : "Agregar Publicación"}
           </Text>
 
-          <Text style={styles.label}>URL de la imagen:</Text>
-          <TextInput
-            style={[styles.input, urlError ? styles.inputError : null]}
-            value={newItem.url_imagen}
-            onChangeText={(text) => onInputChange("url_imagen", text)}
-          />
+          <Text style={styles.label}>Imagen:</Text>
+          <TouchableOpacity
+            onPress={seleccionarImagen}
+            style={styles.imagePicker}
+          >
+            <Text style={styles.buttonText}>Seleccionar desde galería</Text>
+          </TouchableOpacity>
+          {newItem.url_imagen && (
+            <Image source={{ uri: newItem.url_imagen }} style={styles.image} />
+          )}
           {urlError ? <Text style={styles.errorText}>{urlError}</Text> : null}
 
           <Text style={styles.label}>Fecha (YYYY-MM-DD):</Text>
@@ -122,7 +146,6 @@ const AdminGalleryModal = ({
             style={[styles.input, dateError ? styles.inputError : null]}
             value={newItem.fecha}
             onChangeText={(text) => {
-              // Auto-format date input
               const formattedDate = text
                 .replace(/[^0-9-]/g, "")
                 .replace(/(\d{4})(\d{2})/, "$1-$2")
@@ -133,15 +156,24 @@ const AdminGalleryModal = ({
           />
           {dateError ? <Text style={styles.errorText}>{dateError}</Text> : null}
 
-          <Text style={styles.label}>ID del Servicio:</Text>
-          <TextInput
-            style={[styles.input, serviceIdError ? styles.inputError : null]}
-            value={newItem.servicioId}
-            onChangeText={(text) =>
-              onInputChange("servicioId", text.replace(/[^0-9]/g, ""))
-            }
-            keyboardType="number-pad"
-          />
+          <Text style={styles.label}>Servicio:</Text>
+          <View
+            style={[styles.pickerWrapper, serviceIdError && styles.inputError]}
+          >
+            <Picker
+              selectedValue={newItem.servicioId}
+              onValueChange={(value) => onInputChange("servicioId", value)}
+            >
+              <Picker.Item label="Seleccione un servicio..." value={null} />
+              {servicios.map((servicio) => (
+                <Picker.Item
+                  key={servicio.id}
+                  label={servicio.nombre}
+                  value={servicio.id}
+                />
+              ))}
+            </Picker>
+          </View>
           {serviceIdError ? (
             <Text style={styles.errorText}>{serviceIdError}</Text>
           ) : null}
@@ -204,6 +236,19 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     fontSize: 12,
   },
+  imagePicker: {
+    backgroundColor: COLORS.purple.middle.hex,
+    padding: 10,
+    borderRadius: 5,
+    marginBottom: 10,
+    alignItems: "center",
+  },
+  image: {
+    width: "100%",
+    height: 150,
+    marginBottom: 12,
+    borderRadius: 6,
+  },
   modalButtons: {
     flexDirection: "row",
     justifyContent: "flex-end",
@@ -222,6 +267,12 @@ const styles = StyleSheet.create({
   buttonText: {
     color: "#fff",
     textAlign: "center",
+  },
+  pickerWrapper: {
+    borderWidth: 1,
+    borderColor: "#ccc",
+    borderRadius: 5,
+    marginBottom: 12,
   },
 });
 
