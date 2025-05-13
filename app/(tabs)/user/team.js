@@ -10,16 +10,35 @@ import {
 } from "react-native";
 import { Screen } from "../../../components/Screen";
 import { useEmpleados } from "../../../hooks/useEmpleados";
+import { useEmpleadosServicios } from "../../../hooks/useEmpleadosServicios";
+import { useServicios } from "../../../hooks/useServicios";
 import { COLORS } from "../../../config/Colors";
+import EmpleadoServiciosModal from "../../../components/user/team/EmpleadoServiciosModal";
 
 const { width: screenWidth } = Dimensions.get("window");
 const CARD_WIDTH = screenWidth * 0.9;
-const CARD_HEIGHT = 180;
+const CARD_HEIGHT = 240;
 
 export default function EmpleadosScreen() {
-  const { empleados, loading } = useEmpleados();
+  const { empleados, loading: loadingEmpleados } = useEmpleados();
+  const {
+    servicios: allServicios,
+    loading: loadingAllServicios,
+    error: errorAllServicios,
+  } = useServicios();
   const [sorted, setSorted] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [selectedEmpleadoId, setSelectedEmpleadoId] = useState(null);
+  const [serviciosVinculadosNombres, setServiciosVinculadosNombres] = useState(
+    [],
+  );
+  const {
+    serviciosVinculados: serviciosVinculadosIds,
+    loadingServiciosVinculados,
+    errorServiciosVinculados,
+    loadServiciosVinculados,
+  } = useEmpleadosServicios(selectedEmpleadoId);
 
   useEffect(() => {
     if (empleados) {
@@ -29,8 +48,40 @@ export default function EmpleadosScreen() {
     }
   }, [empleados]);
 
+  useEffect(() => {
+    if (selectedEmpleadoId) {
+      loadServiciosVinculados();
+    }
+  }, [selectedEmpleadoId, loadServiciosVinculados]);
+
+  useEffect(() => {
+    if (serviciosVinculadosIds && allServicios) {
+      const nombres = serviciosVinculadosIds
+        .map((linkedService) => {
+          const servicio = allServicios.find(
+            (s) => s.id === linkedService.servicioId,
+          );
+          return servicio ? { id: servicio.id, nombre: servicio.nombre } : null;
+        })
+        .filter(Boolean);
+      setServiciosVinculadosNombres(nombres);
+    } else {
+      setServiciosVinculadosNombres([]);
+    }
+  }, [serviciosVinculadosIds, allServicios]);
+
   const openImage = useCallback((url) => setSelectedImage(url), []);
   const closeImage = useCallback(() => setSelectedImage(null), []);
+
+  const openServiciosModal = useCallback((empleadoId) => {
+    setSelectedEmpleadoId(empleadoId);
+    setModalVisible(true);
+  }, []);
+
+  const closeServiciosModal = useCallback(() => {
+    setModalVisible(false);
+    setSelectedEmpleadoId(null);
+  }, []);
 
   const renderItem = ({ item }) => (
     <View style={styles.card}>
@@ -42,6 +93,12 @@ export default function EmpleadosScreen() {
       <View style={styles.info}>
         <Text style={styles.title}>{item.nombre}</Text>
         <Text>Sede: {item.sede?.barrio ?? "-"}</Text>
+        <TouchableOpacity
+          style={styles.serviciosButton}
+          onPress={() => openServiciosModal(item.id)}
+        >
+          <Text style={styles.serviciosButtonText}>Mostrar Servicios</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -52,9 +109,16 @@ export default function EmpleadosScreen() {
         <Text style={styles.header}>Nuestro Equipo</Text>
       </View>
 
-      {loading ? (
+      {loadingEmpleados || loadingServiciosVinculados || loadingAllServicios ? (
         <View style={styles.loadingWrapper}>
-          <Text style={styles.loading}>Cargando empleados…</Text>
+          <Text style={styles.loading}>Cargando empleados y servicios…</Text>
+        </View>
+      ) : errorServiciosVinculados || errorAllServicios ? (
+        <View style={styles.loadingWrapper}>
+          <Text style={styles.error}>
+            Hubo un problema al cargar la información. Por favor, intenta más
+            tarde.
+          </Text>
         </View>
       ) : (
         <FlatList
@@ -80,6 +144,13 @@ export default function EmpleadosScreen() {
           </TouchableOpacity>
         </View>
       )}
+
+      <EmpleadoServiciosModal
+        isVisible={modalVisible}
+        onClose={closeServiciosModal}
+        servicios={serviciosVinculadosNombres}
+        error={errorAllServicios}
+      />
     </Screen>
   );
 }
@@ -103,6 +174,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   loading: { textAlign: "center", marginTop: 20 },
+  error: { textAlign: "center", marginTop: 20, color: "red" },
   listContainer: { padding: 16, paddingBottom: 40 },
   empty: { textAlign: "center", marginTop: 20, color: "#888" },
   card: {
@@ -122,6 +194,8 @@ const styles = StyleSheet.create({
   },
   info: {
     padding: 8,
+    flex: 1,
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 16,
@@ -152,4 +226,15 @@ const styles = StyleSheet.create({
     padding: 5,
   },
   closeText: { color: "#fff", fontSize: 18, fontWeight: "bold" },
+  serviciosButton: {
+    backgroundColor: COLORS.purple.middle.hex,
+    paddingVertical: 8,
+    borderRadius: 5,
+    alignItems: "center",
+    marginTop: 8,
+  },
+  serviciosButtonText: {
+    color: COLORS.purple.text.hex,
+    fontWeight: "bold",
+  },
 });
