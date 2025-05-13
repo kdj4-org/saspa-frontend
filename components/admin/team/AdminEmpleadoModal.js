@@ -31,11 +31,25 @@ const AdminEmpleadoModal = ({
     setErrors({});
   }, [formData]);
 
+  useEffect(() => {
+    if (!isVisible) {
+      resetForm();
+    }
+  }, [isVisible]);
+
   const validate = () => {
     const e = {};
     if (!formData.nombre?.trim()) e.nombre = "El nombre es requerido.";
     if (!formData.sede) e.sede = "La sede es requerida.";
+    if (!formData.url_foto) e.url_foto = "La foto es requerida.";
     return e;
+  };
+
+  const resetForm = () => {
+    setErrors({});
+    onInputChange("nombre", "");
+    onInputChange("sede", null);
+    onInputChange("url_foto", null);
   };
 
   const handleSave = () => {
@@ -45,6 +59,7 @@ const AdminEmpleadoModal = ({
       Alert.alert("Errores de validación", "Revisa los campos resaltados.");
     } else {
       onSubmit();
+      resetForm();
     }
   };
 
@@ -60,8 +75,9 @@ const AdminEmpleadoModal = ({
         const archivo = result.assets[0];
         const res = await subirImagen(archivo);
 
-        if (res.data?.filePath) {
-          onInputChange("url_foto", res.data.filePath);
+        if (res.filePath) {
+          onInputChange("url_foto", res.filePath);
+          console.log("Imagen subida:", res.filePath);
           Alert.alert("Éxito", "Imagen subida correctamente.");
         } else {
           throw new Error("No se recibió URL de la imagen");
@@ -126,9 +142,18 @@ const AdminEmpleadoModal = ({
           {formData.url_foto && (
             <Image source={{ uri: formData.url_foto }} style={styles.image} />
           )}
+          {errors.url_foto && (
+            <Text style={styles.error}>{errors.url_foto}</Text>
+          )}
 
           <View style={styles.buttons}>
-            <TouchableOpacity style={styles.cancel} onPress={onClose}>
+            <TouchableOpacity
+              style={styles.cancel}
+              onPress={() => {
+                resetForm();
+                onClose();
+              }}
+            >
               <Text style={styles.btnText}>Cancelar</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.save} onPress={handleSave}>
