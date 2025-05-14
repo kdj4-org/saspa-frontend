@@ -1,4 +1,3 @@
-// components/admin/gallery/AdminServiceItem.js
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../../config/Colors";
@@ -15,6 +14,7 @@ const AdminServiceItem = ({ item, onEdit, onDelete }) => {
   return (
     <View style={styles.listItem}>
       <View style={styles.infoRow}>
+        <Text style={styles.infoText}>ID: {item.id}</Text>
         <Text style={styles.infoText}>Nombre: {item.nombre}</Text>
         <Text style={styles.infoText}>Descripción: {item.descripcion}</Text>
         <Text style={styles.infoText}>
