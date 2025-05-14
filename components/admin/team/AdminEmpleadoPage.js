@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  TouchableOpacity,
-  TextInput,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, StyleSheet } from "react-native";
 import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useSedes } from "../../../hooks/useSedes";
 import AdminEmpleadoItem from "./AdminEmpleadoItem";
 import AdminEmpleadoModal from "./AdminEmpleadoModal";
 import AdminEmpleadoServiciosModal from "./AdminEmpleadoServiciosModal";
 import ConfirmationModal from "../../ui/ConfirmationModal";
-import { COLORS } from "../../../config/Colors";
+import OperationStatusModal from "../../ui/OperationStatusModal";
+import SearchBar from "../../ui/SearchBar";
+import ActionButton from "../../ui/ActionButton";
+import { print_log } from "../../../utils/development";
 
 const AdminEmpleadosPage = () => {
   const {
@@ -23,8 +18,8 @@ const AdminEmpleadosPage = () => {
     crearEmpleado,
     editarEmpleado,
     eliminarEmpleado,
-  } = useEmpleados();
-  const { sedes } = useSedes();
+  } = useEmpleados({ admin: true });
+  const { sedes, loading: loadingSedes } = useSedes();
 
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
@@ -40,18 +35,23 @@ const AdminEmpleadosPage = () => {
   const [serviciosModalVisible, setServiciosModalVisible] = useState(false);
   const [selectedEmpleadoId, setSelectedEmpleadoId] = useState(null);
   const [selectedEmpleadoNombre, setSelectedEmpleadoNombre] = useState("");
+  const [operationStatusModalVisible, setOperationStatusModalVisible] =
+    useState(false);
+  const [operationStatus, setOperationStatus] = useState(null);
+
+  const filterEmpleados = (empleados, sedes, search) => {
+    return empleados.filter((e) =>
+      e.nombre.toLowerCase().includes(search.toLowerCase()),
+    );
+  };
 
   useEffect(() => {
-    const enriched = empleados.map((e) => ({
-      ...e,
-      sedeObj: sedes.find((s) => s.id === e.sede || s.id === e.sede_id) || null,
-    }));
-    setFiltered(
-      enriched.filter((e) =>
-        e.nombre.toLowerCase().includes(search.toLowerCase()),
-      ),
-    );
+    setFiltered(filterEmpleados(empleados, sedes, search));
   }, [search, empleados, sedes]);
+
+  useEffect(() => {
+    print_log("Los empleados son: ", empleados);
+  }, [filterEmpleados]);
 
   useEffect(() => {
     if (selected) {
@@ -87,14 +87,14 @@ const AdminEmpleadosPage = () => {
       };
       if (selected?.id) {
         await editarEmpleado(selected.id, payload);
-        Alert.alert("Éxito", "Empleado actualizado.");
+        print_log("Éxito", "Empleado actualizado.");
       } else {
         await crearEmpleado(payload);
-        Alert.alert("Éxito", "Empleado creado.");
+        print_log("Éxito", "Empleado creado.");
       }
       closeModal();
     } catch (err) {
-      Alert.alert("Error", "Ocurrió un problema.");
+      print_log("Error", "Ocurrió un problema.");
     }
   };
 
@@ -106,9 +106,9 @@ const AdminEmpleadosPage = () => {
     setConfirmVisible(false);
     try {
       await eliminarEmpleado(toDelete);
-      Alert.alert("Éxito", "Empleado eliminado.");
+      print_log("Éxito", "Empleado eliminado.");
     } catch {
-      Alert.alert("Error", "No se pudo eliminar.");
+      print_log("Error", "No se pudo eliminar.");
     }
   };
 
@@ -120,28 +120,37 @@ const AdminEmpleadosPage = () => {
     setServiciosModalVisible(true);
   };
 
-  const closeServiciosModal = () => {
+  const closeServiciosModal = (result) => {
+    setServiciosModalVisible(false);
     setSelectedEmpleadoId(null);
     setSelectedEmpleadoNombre("");
-    setServiciosModalVisible(false);
+    if (result === "success") {
+      setOperationStatus("success");
+      setOperationStatusModalVisible(true);
+    } else if (result === "failure") {
+      setOperationStatus("failure");
+      setOperationStatusModalVisible(true);
+    }
+  };
+
+  const closeOperationStatusModal = () => {
+    setOperationStatusModalVisible(false);
+    setOperationStatus(null);
   };
 
   return (
     <View style={styles.container}>
-      <TextInput
-        style={styles.search}
+      <SearchBar
         placeholder="Buscar por nombre"
         value={search}
         onChangeText={setSearch}
       />
-      <TouchableOpacity
-        style={[styles.addBtn, { backgroundColor: COLORS.purple.middle.hex }]}
+      <ActionButton
+        title="Agregar Nuevo Empleado"
         onPress={() => openModal(null)}
-      >
-        <Text style={styles.addText}>Agregar Nuevo Empleado</Text>
-      </TouchableOpacity>
+      />
 
-      {loading ? (
+      {loading && loadingSedes ? (
         <Text style={styles.loading}>Cargando empleados…</Text>
       ) : (
         <FlatList
@@ -149,7 +158,8 @@ const AdminEmpleadosPage = () => {
           keyExtractor={(i) => i.id.toString()}
           renderItem={({ item }) => (
             <AdminEmpleadoItem
-              item={{ ...item, sede: item.sedeObj }}
+              item={{ ...item }}
+              sedes={sedes}
               onEdit={() => openModal(item)}
               onDelete={confirmDelete}
               onServicios={openServiciosModal}
@@ -180,22 +190,18 @@ const AdminEmpleadosPage = () => {
         empleadoId={selectedEmpleadoId}
         empleadoNombre={selectedEmpleadoNombre}
       />
+
+      <OperationStatusModal
+        isVisible={operationStatusModalVisible}
+        onClose={closeOperationStatusModal}
+        status={operationStatus}
+      />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: { flex: 1, padding: 12 },
-  search: {
-    borderWidth: 1,
-    borderColor: "gray",
-    borderRadius: 5,
-    padding: 8,
-    marginBottom: 12,
-    backgroundColor: "white",
-  },
-  addBtn: { padding: 10, borderRadius: 5, marginBottom: 12 },
-  addText: { color: "#fff", textAlign: "center" },
   loading: { textAlign: "center", marginTop: 20 },
 });
 

@@ -1,18 +1,23 @@
-// src/hooks/useEmpleados.jsx
 import { useState, useEffect, useCallback } from "react";
 import * as empleadoService from "../services/team";
+import { print_error } from "../utils/development";
 
-export function useEmpleados() {
+export function useEmpleados({ admin = false }) {
   const [empleados, setEmpleados] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await empleadoService.fetchEquipo();
-      setEmpleados(Array.isArray(res.data) ? res.data : []);
+      if (admin) {
+        const res = await empleadoService.fetchEmpleados();
+        setEmpleados(Array.isArray(res.data) ? res.data : []);
+      } else {
+        const res = await empleadoService.fetchEquipo();
+        setEmpleados(Array.isArray(res.data) ? res.data : []);
+      }
     } catch (err) {
-      console.error("Error cargando empleados", err);
+      print_error("Error cargando empleados", err);
       setEmpleados([]);
     } finally {
       setLoading(false);
@@ -25,7 +30,6 @@ export function useEmpleados() {
         await empleadoService.createEmpleado(data);
         await load();
       } catch (error) {
-        console.error("Error creando empleado:", error);
         throw error;
       }
     },
@@ -38,7 +42,7 @@ export function useEmpleados() {
         await empleadoService.updateEmpleado(id, data);
         await load();
       } catch (error) {
-        console.error("Error editando empleado:", error);
+        print_error("Error editando empleado:", error);
         throw error;
       }
     },
@@ -51,7 +55,7 @@ export function useEmpleados() {
         await empleadoService.deleteEmpleado(id);
         await load();
       } catch (error) {
-        console.error("Error eliminando empleado:", error);
+        print_error("Error eliminando empleado:", error);
         throw error;
       }
     },

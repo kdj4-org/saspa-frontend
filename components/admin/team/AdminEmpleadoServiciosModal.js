@@ -1,16 +1,12 @@
 import React, { useState, useEffect } from "react";
-import {
-  Modal,
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  FlatList,
-  Alert,
-} from "react-native";
+import { Modal, View, Text, StyleSheet, FlatList, Alert } from "react-native";
 import { useServicios } from "../../../hooks/useServicios";
 import { useEmpleadosServicios } from "../../../hooks/useEmpleadosServicios";
-import { COLORS } from "../../../config/Colors";
+import ModalTitle from "../../ui/ModalTitle";
+import SelectableListItem from "../../ui/SelectableListItem";
+import ModalButtons from "../../ui/ModalButtons";
+import LoadingOverlay from "../../ui/LoadingOverlay";
+import { print_error } from "../../../utils/development";
 
 const AdminEmpleadoServiciosModal = ({
   isVisible,
@@ -20,35 +16,26 @@ const AdminEmpleadoServiciosModal = ({
 }) => {
   const { servicios, loading: loadingServicios } = useServicios();
   const {
-    serviciosVinculados,
     loadingServiciosVinculados,
     errorServiciosVinculados,
     vincularServicioEmpleado,
     desvincularServicioEmpleado,
+    initialServiciosIds,
   } = useEmpleadosServicios(empleadoId);
 
   const [selectedServicios, setSelectedServicios] = useState([]);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    // Inicializar los servicios seleccionados con los que ya están vinculados
-    if (
-      serviciosVinculados &&
-      serviciosVinculados.length > 0 &&
-      servicios &&
-      servicios.length > 0
-    ) {
+    if (servicios && servicios.length > 0 && initialServiciosIds) {
       const initialSelected = servicios
-        .filter((servicio) =>
-          serviciosVinculados.some(
-            (vinculado) => vinculado.servicioId === servicio.id,
-          ),
-        )
+        .filter((servicio) => initialServiciosIds.includes(servicio.id))
         .map((s) => s.id);
       setSelectedServicios(initialSelected);
     } else {
       setSelectedServicios([]);
     }
-  }, [servicios, serviciosVinculados]);
+  }, [servicios, initialServiciosIds, isVisible]);
 
   const toggleServicio = (servicioId) => {
     if (selectedServicios.includes(servicioId)) {
@@ -64,55 +51,53 @@ const AdminEmpleadoServiciosModal = ({
       return;
     }
 
-    const serviciosAVincular = selectedServicios.filter(
-      (id) => !serviciosVinculados.some((v) => v.servicioId === id),
-    );
-    const serviciosADesvincular = serviciosVinculados
-      .filter((v) => !selectedServicios.includes(v.servicioId))
-      .map((v) => v.servicioId);
+    setIsSaving(true);
+    let operationSuccess = true;
+    let errorMessage = null;
 
-    let success = true;
+    const initialIds = [...initialServiciosIds];
+    const currentSelectedIds = [...selectedServicios];
+
+    const serviciosAVincular = currentSelectedIds.filter(
+      (id) => !initialIds.includes(id),
+    );
+
+    const serviciosADesvincular = initialIds.filter(
+      (id) => !currentSelectedIds.includes(id),
+    );
 
     for (const servicioId of serviciosAVincular) {
       try {
         await vincularServicioEmpleado(servicioId);
-        // SASPA-108: Mostrar mensaje de éxito al vincular
-        Alert.alert(
-          "Éxito",
-          `Servicio ${servicios.find((s) => s.id === servicioId)?.nombre} vinculado.`,
-        );
       } catch (error) {
-        success = false;
-        // SASPA-109: Mostrar mensaje de error si la vinculación falla
-        Alert.alert(
-          "Error",
-          `No se pudo vincular el servicio ${servicios.find((s) => s.id === servicioId)?.nombre}.`,
-        );
-        console.error("Error al vincular servicio:", error);
+        operationSuccess = false;
+        errorMessage = "Ocurrió un error al intentar guardar los cambios.";
+        print_error("Error al vincular servicio:", error);
+        break;
+      }
+      if (!operationSuccess) break;
+    }
+
+    if (operationSuccess) {
+      for (const servicioId of serviciosADesvincular) {
+        try {
+          await desvincularServicioEmpleado(servicioId);
+        } catch (error) {
+          operationSuccess = false;
+          errorMessage = "Ocurrió un error al intentar guardar los cambios.";
+          print_error("Error al desvincular servicio:", error);
+          break;
+        }
+        if (!operationSuccess) break;
       }
     }
 
-    for (const servicioId of serviciosADesvincular) {
-      try {
-        await desvincularServicioEmpleado(servicioId);
-        // SASPA-108: Mostrar mensaje de éxito al desvincular
-        Alert.alert(
-          "Éxito",
-          `Servicio ${servicios.find((s) => s.id === servicioId)?.nombre} desvinculado.`,
-        );
-      } catch (error) {
-        success = false;
-        // SASPA-109: Mostrar mensaje de error si la desvinculación falla
-        Alert.alert(
-          "Error",
-          `No se pudo desvincular el servicio ${servicios.find((s) => s.id === servicioId)?.nombre}.`,
-        );
-        console.error("Error al desvincular servicio:", error);
-      }
-    }
+    setIsSaving(false);
 
-    if (success) {
-      onClose();
+    if (operationSuccess) {
+      onClose("success");
+    } else if (errorMessage) {
+      onClose("failure");
     }
   };
 
@@ -121,13 +106,12 @@ const AdminEmpleadoServiciosModal = ({
       transparent
       animationType="fade"
       visible={isVisible}
-      onRequestClose={onClose}
+      onRequestClose={() => onClose(null)}
     >
       <View style={styles.overlay}>
+        <LoadingOverlay isVisible={isSaving} />
         <View style={styles.container}>
-          <Text style={styles.title}>
-            Vincular servicios a {empleadoNombre}{" "}
-          </Text>
+          <ModalTitle title={`Vincular servicios a ${empleadoNombre}`} />
 
           {loadingServicios || loadingServiciosVinculados ? (
             <Text>Cargando servicios...</Text>
@@ -138,31 +122,22 @@ const AdminEmpleadoServiciosModal = ({
               data={servicios}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[
-                    styles.servicioItem,
-                    selectedServicios.includes(item.id) &&
-                      styles.servicioSeleccionado,
-                  ]}
+                <SelectableListItem
+                  item={item}
+                  isSelected={selectedServicios.includes(item.id)}
                   onPress={() => toggleServicio(item.id)}
-                >
-                  <Text>{item.nombre}</Text>
-                </TouchableOpacity>
+                  disabled={isSaving}
+                />
               )}
             />
           )}
 
-          <View style={styles.buttons}>
-            <TouchableOpacity style={styles.cancel} onPress={onClose}>
-              <Text style={styles.btnText}>Cancelar</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.save}
-              onPress={handleGuardarServicios}
-            >
-              <Text style={styles.btnText}>Guardar</Text>
-            </TouchableOpacity>
-          </View>
+          <ModalButtons
+            onCancel={() => onClose(null)}
+            onSave={handleGuardarServicios}
+            disabledSave={isSaving}
+            disabledCancel={isSaving}
+          />
         </View>
       </View>
     </Modal>
@@ -181,41 +156,6 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     minHeight: "50%",
-  },
-  title: {
-    fontSize: 18,
-    fontWeight: "bold",
-    marginBottom: 16,
-    color: COLORS.purple.text.hex,
-    textAlign: "center",
-  },
-  servicioItem: {
-    padding: 10,
-    borderBottomWidth: 1,
-    borderBottomColor: "#eee",
-  },
-  servicioSeleccionado: {
-    backgroundColor: COLORS.purple.middle.hex,
-  },
-  buttons: {
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: 20,
-  },
-  cancel: {
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.purple.middle.hex,
-    marginRight: 8,
-  },
-  save: {
-    padding: 10,
-    borderRadius: 5,
-    backgroundColor: COLORS.purple.text.hex,
-  },
-  btnText: {
-    color: "#fff",
-    textAlign: "center",
   },
   error: {
     color: "red",

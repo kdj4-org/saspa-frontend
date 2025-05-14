@@ -1,16 +1,29 @@
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../../../config/Colors";
+import { print_log } from "../../../utils/development";
 
-const AdminEmpleadoItem = ({ item, onEdit, onDelete, onServicios }) => {
+const AdminEmpleadoItem = ({ item, sedes, onEdit, onDelete, onServicios }) => {
+  const sedeEncontrada = sedes.find((sede) => sede.id === item.sede_id);
+
+  print_log("Item:", item);
+  print_log("Objeto de Sedes:", sedes);
+  print_log("Objeto de Sede Encontrada:", sedeEncontrada);
+
   return (
     <View style={styles.card}>
       {item.url_foto ? (
         <Image source={{ uri: item.url_foto }} style={styles.image} />
       ) : null}
       <View style={styles.info}>
+        <Text style={styles.text}>ID: {item.id}</Text>
         <Text style={styles.text}>Nombre: {item.nombre}</Text>
-        <Text style={styles.text}>Sede: {item.sede?.barrio || "-"}</Text>
+        <Text style={styles.text}>
+          Sede:{" "}
+          {sedeEncontrada
+            ? `${sedeEncontrada.direccion}, ${sedeEncontrada.barrio}, ${sedeEncontrada.ciudad}`
+            : "-"}
+        </Text>
       </View>
       <View style={styles.actions}>
         <TouchableOpacity
@@ -21,7 +34,7 @@ const AdminEmpleadoItem = ({ item, onEdit, onDelete, onServicios }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.btn, styles.edit]}
-          onPress={() => onEdit(item)}
+          onPress={() => onEdit(item.id)}
         >
           <Text style={styles.btnText}>Editar</Text>
         </TouchableOpacity>

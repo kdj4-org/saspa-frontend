@@ -1,6 +1,6 @@
-// src/hooks/useEmpleadosServicios.jsx
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback } from "react";
 import * as teamService from "../services/teamServices";
+import { print_error, print_warn } from "../utils/development";
 
 export function useEmpleadosServicios(empleadoId) {
   const [serviciosVinculados, setServiciosVinculados] = useState([]);
@@ -8,12 +8,13 @@ export function useEmpleadosServicios(empleadoId) {
     useState(true);
   const [errorServiciosVinculados, setErrorServiciosVinculados] =
     useState(null);
-  const initialServiciosVinculados = useRef([]);
+  const [initialServiciosIds, setInitialServiciosIds] = useState([]);
 
   const loadServiciosVinculados = useCallback(async () => {
     if (!empleadoId) {
       setServiciosVinculados([]);
       setLoadingServiciosVinculados(false);
+      setInitialServiciosIds([]);
       return;
     }
 
@@ -24,14 +25,14 @@ export function useEmpleadosServicios(empleadoId) {
       const res = await teamService.fetchServiciosVinculados(empleadoId);
       const data = Array.isArray(res.data) ? res.data : [];
       setServiciosVinculados(data);
-      initialServiciosVinculados.current = data.map((item) => item.servicioId);
+      setInitialServiciosIds(data.map((item) => item.id));
     } catch (err) {
-      console.error("Error cargando servicios vinculados", err);
+      print_error("Error cargando servicios vinculados", err);
       setErrorServiciosVinculados(
         err.message || "Error al cargar los servicios vinculados.",
       );
       setServiciosVinculados([]);
-      initialServiciosVinculados.current = [];
+      setInitialServiciosIds([]);
     } finally {
       setLoadingServiciosVinculados(false);
     }
@@ -40,15 +41,16 @@ export function useEmpleadosServicios(empleadoId) {
   const vincularServicioEmpleado = useCallback(
     async (servicioId) => {
       if (!empleadoId) {
-        console.warn("Empleado ID no proporcionado para vincular servicio.");
+        print_warn("Empleado ID no proporcionado para vincular servicio.");
         return;
       }
       try {
-        const res = await teamService.vincularServicio(empleadoId, servicioId);
+        const payload = { servicio_id: servicioId };
+        const res = await teamService.vincularServicio(empleadoId, payload);
         await loadServiciosVinculados();
         return res.data;
       } catch (error) {
-        console.error("Error al vincular servicio:", error);
+        print_error("Error al vincular servicio:", error);
         setErrorServiciosVinculados(
           error.message || "Error al vincular el servicio.",
         );
@@ -61,7 +63,7 @@ export function useEmpleadosServicios(empleadoId) {
   const desvincularServicioEmpleado = useCallback(
     async (servicioId) => {
       if (!empleadoId) {
-        console.warn("Empleado ID no proporcionado para desvincular servicio.");
+        print_warn("Empleado ID no proporcionado para desvincular servicio.");
         return;
       }
       try {
@@ -72,7 +74,7 @@ export function useEmpleadosServicios(empleadoId) {
         await loadServiciosVinculados();
         return res.data;
       } catch (error) {
-        console.error("Error al desvincular servicio:", error);
+        print_error("Error al desvincular servicio:", error);
         setErrorServiciosVinculados(
           error.message || "Error al desvincular el servicio.",
         );
@@ -93,6 +95,6 @@ export function useEmpleadosServicios(empleadoId) {
     loadServiciosVinculados,
     vincularServicioEmpleado,
     desvincularServicioEmpleado,
-    initialServiciosVinculados,
+    initialServiciosIds,
   };
 }
