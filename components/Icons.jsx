@@ -1,4 +1,13 @@
 import Feather from "@expo/vector-icons/Feather";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+
+export const SortAlphaUpIcon = (props) => (
+  <FontAwesome5 name="sort-alpha-up" size={24} color="black" {...props} />
+);
+
+export const SortAlphaDownIcon = (props) => (
+  <FontAwesome5 name="sort-alpha-down" size={24} color="black" {...props} />
+);
 
 export const HomeIcon = (props) => (
   <Feather name="home" size={24} color="black" {...props} />

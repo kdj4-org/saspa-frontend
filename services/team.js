@@ -5,11 +5,14 @@ import { api } from "./api";
 
 // GET /cliente/equipo/
 export const fetchEquipo = () => {
-  console.log("Configuracion de la peticion", api.defaults);
   return api.get("/cliente/equipo/");
 };
 
 // ===== ADMIN =====
+// GET /admin/empleados/
+export const fetchEmpleados = () => {
+  return api.get("/admin/empleados/");
+};
 
 // POST /admin/empleados
 export const createEmpleado = (payload) =>

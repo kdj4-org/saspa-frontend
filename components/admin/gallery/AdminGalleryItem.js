@@ -1,4 +1,3 @@
-// components/admin/gallery/AdminGalleryItem.js
 import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Image } from "react-native";
 import { COLORS } from "../../../config/Colors";
@@ -15,9 +14,10 @@ const AdminGalleryItem = ({ item, onDelete }) => {
           <Image source={{ uri: item.url_imagen }} style={styles.thumbnail} />
         </View>
         <View style={styles.infoContainer}>
-          {/* <Text>ID: {item.id}</Text> */}
           <Text>Fecha: {item.fecha}</Text>
-          <Text>Servicio ID: {item.servicioId}</Text>
+          <Text>
+            Servicio: [{item.servicio.id}] {item.servicio.nombre}
+          </Text>
         </View>
       </View>
       <View style={styles.actionButtons}>

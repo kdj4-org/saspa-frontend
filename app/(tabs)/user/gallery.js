@@ -106,7 +106,7 @@ export default function Gallery() {
         ) : sortedServicios.length ? (
           sortedServicios.map((servicio) => (
             <Text key={servicio.id} style={styles.serviceItem}>
-              • {servicio.nombre}
+              • {servicio.nombre} - ${servicio.precio}
             </Text>
           ))
         ) : (
