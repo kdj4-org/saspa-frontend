@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Screen } from "../../../components/Screen";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import AdminGalleryPage from "../../../components/admin/gallery/AdminGalleryPage";
 import AdminServicesPage from "../../../components/admin/gallery/AdminServicesPage";
@@ -12,20 +13,22 @@ const AdminGalleryScreen = () => {
   };
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
-        <Text style={styles.header}>
-          Administrar {showGallery ? "Publicaciones" : "Servicios"}
-        </Text>
-        <TouchableOpacity onPress={toggleView} style={styles.switchButton}>
-          <Text style={styles.switchButtonText}>
-            Administrar {showGallery ? "Servicios" : "Publicaciones"}
+    <Screen>
+      <View style={styles.container}>
+        <View style={styles.headerContainer}>
+          <Text style={styles.header}>
+            Administrar {showGallery ? "Publicaciones" : "Servicios"}
           </Text>
-        </TouchableOpacity>
-      </View>
+          <TouchableOpacity onPress={toggleView} style={styles.switchButton}>
+            <Text style={styles.switchButtonText}>
+              Administrar {showGallery ? "Servicios" : "Publicaciones"}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-      {showGallery ? <AdminGalleryPage /> : <AdminServicesPage />}
-    </View>
+        {showGallery ? <AdminGalleryPage /> : <AdminServicesPage />}
+      </View>
+    </Screen>
   );
 };
 
