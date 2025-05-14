@@ -5,7 +5,6 @@ import { api } from "./api";
 
 // GET /usuario/servicios
 export const fetchSedes = () => {
-  console.log("Configuracion de la peticion", api.defaults);
   return api.get("/usuario/sedes/");
 };
 

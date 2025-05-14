@@ -12,7 +12,6 @@ export const fetchServicios = () => {
   if (USE_MOCKS) {
     return Promise.resolve({ data: servicesMock });
   }
-  console.log("Configuracion de la peticion", api.defaults);
   return api.get("/usuario/servicios/");
 };
 

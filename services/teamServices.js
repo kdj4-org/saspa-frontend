@@ -1,4 +1,3 @@
-// services/teamServices.jsx
 import { api } from "./api";
 import Constants from "expo-constants";
 import { serviciosVinculadosMock } from "./mocks/teamServicesMocks";
@@ -18,8 +17,8 @@ export const fetchServiciosVinculados = (empleadoId) => {
 };
 
 // POST /admin/empleados/{empleadoId}/servicios/
-export const vincularServicio = (empleadoId, servicioId) => {
-  return api.post(`/admin/empleados/${empleadoId}/servicios/`, { servicioId });
+export const vincularServicio = (empleadoId, payload) => {
+  return api.post(`/admin/empleados/${empleadoId}/servicios/`, payload);
 };
 
 // DELETE /admin/empleados/{empleadoId}/servicios/{servicioId}/
