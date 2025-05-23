@@ -6,7 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   Alert,
-  FlatList,
+  ScrollView,
 } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Picker } from "@react-native-picker/picker";
@@ -37,13 +37,13 @@ export default function AdminBloqueosScreen() {
   const [horaInicio, setHoraInicio] = useState(horasDisponibles[0]);
   const [horaFin, setHoraFin] = useState(horasDisponibles[1]);
 
-  // Filtrar bloqueos por empleado
-  const filtered = bloqueos
-    .filter((b) => b.empleado_id === selectedEmp)
-    .filter((b) => {
-      // Rango de fecha opcional
-      return true;
-    });
+  const filtered = bloqueos.map((b) => {
+    const empleado = empleados.find((e) => e.id === b.empleado_id);
+    return {
+      ...b,
+      empleadoNombre: empleado?.nombre || "Desconocido",
+    };
+  });
 
   const addBloqueo = async () => {
     if (!selectedEmp) return Alert.alert("Error", "Seleccione un empleado");
@@ -66,18 +66,35 @@ export default function AdminBloqueosScreen() {
     }
   };
 
-  const removeBloqueo = async (id) => {
-    try {
-      await deleteBloqueo(id);
-      Alert.alert("Éxito", "Bloqueo eliminado");
-    } catch {
-      Alert.alert("Error", "No se pudo eliminar bloqueo");
-    }
+  const removeBloqueo = (id) => {
+    Alert.alert(
+      "Confirmar eliminación",
+      "¿Estás seguro de que deseas eliminar este bloqueo?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Eliminar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              await deleteBloqueo(id);
+              Alert.alert("Éxito", "Bloqueo eliminado");
+            } catch {
+              Alert.alert("Error", "No se pudo eliminar bloqueo");
+            }
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   return (
     <Screen>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.container}>
         <Text style={styles.title}>Gestión de Bloqueos</Text>
 
         <Text style={styles.label}>Empleado:</Text>
@@ -134,12 +151,14 @@ export default function AdminBloqueosScreen() {
         <Text style={[styles.subtitle, { marginTop: 20 }]}>
           Bloqueos Registrados
         </Text>
-        <FlatList
-          data={filtered}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <View style={styles.blockRow}>
+
+        {filtered.length === 0 ? (
+          <Text style={{ marginVertical: 10 }}>No hay bloqueos</Text>
+        ) : (
+          filtered.map((item) => (
+            <View key={item.id} style={styles.blockRow}>
               <Text>
+                {item.empleado} -{" "}
                 {new Date(item.fecha_inicio).toLocaleDateString()}{" "}
                 {new Date(item.fecha_inicio).toLocaleTimeString()} -{" "}
                 {new Date(item.fecha_fin).toLocaleTimeString()}
@@ -148,9 +167,9 @@ export default function AdminBloqueosScreen() {
                 <Text style={styles.deleteText}>Eliminar</Text>
               </TouchableOpacity>
             </View>
-          )}
-        />
-      </View>
+          ))
+        )}
+      </ScrollView>
     </Screen>
   );
 }
@@ -209,11 +228,12 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   blockRow: {
-    flexDirection: "row",
+    flexDirection: "column",
     justifyContent: "space-between",
     padding: 8,
     borderBottomWidth: 1,
     borderColor: "#EEE",
+    alignItems: "center",
   },
   deleteText: {
     color: "red",

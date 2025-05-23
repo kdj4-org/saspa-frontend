@@ -94,7 +94,8 @@ export function useDisponibilidad() {
 
   useEffect(() => {
     loadHorarios();
-  }, [loadHorarios]);
+    loadBloqueos();
+  }, [loadHorarios, loadBloqueos]);
 
   return {
     horarios,
