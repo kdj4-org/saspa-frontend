@@ -35,8 +35,7 @@ export default function AdminDisponibilidadScreen() {
   const { empleados } = useEmpleados({
     admin: true,
   });
-  const { horarios, crearDisponibilidad, actualizarDisponibilidad } =
-    useDisponibilidad();
+  const { horarios, actualizarDisponibilidad } = useDisponibilidad();
 
   const [selectedEmp, setSelectedEmp] = useState(null);
 
@@ -133,9 +132,7 @@ export default function AdminDisponibilidadScreen() {
       })),
     };
     try {
-      const exists = horarios.some((h) => h.empleado_id === selectedEmp);
-      if (exists) await actualizarDisponibilidad(selectedEmp, payload);
-      else await crearDisponibilidad(selectedEmp, payload);
+      await actualizarDisponibilidad(selectedEmp, payload);
       Alert.alert("Éxito", "Disponibilidad guardada correctamente.");
     } catch {
       Alert.alert("Error", "No se pudo guardar la disponibilidad.");
