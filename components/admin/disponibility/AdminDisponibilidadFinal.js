@@ -49,10 +49,19 @@ export default function AdminDisponibilidadFinalScreen() {
     () => horarios.filter((h) => !empleadoId || h.empleado_id === empleadoId),
     [horarios, empleadoId],
   );
-  const bloq = useMemo(
-    () => bloqueos.filter((b) => !empleadoId || b.empleado_id === empleadoId),
-    [bloqueos, empleadoId],
+  const empleado = useMemo(
+    () => empleados.find((e) => e.id === empleadoId),
+    [empleados, empleadoId],
   );
+  const bloq = useMemo(() => {
+    if (!empleado) return [];
+    // Filtrar bloqueos del empleado en la semana seleccionada
+    return bloqueos.filter((b) => {
+      if (b.empleado !== empleado.nombre) return false;
+      const fecha = new Date(b.fecha_inicio);
+      return fecha >= inicioSemana && fecha <= addDays(inicioSemana, 6);
+    });
+  }, [bloqueos, empleado, inicioSemana]);
 
   // Determinar estado de slot: libre (true) si disponible y no bloqueado
   const isLibre = (diaIdx, slot) => {
@@ -77,8 +86,11 @@ export default function AdminDisponibilidadFinalScreen() {
         d.getMonth() === fecha.getMonth() &&
         d.getDate() === fecha.getDate()
       ) {
-        const si = d.getHours() * 60;
-        const ei = new Date(b.fecha_fin).getHours() * 60;
+        const si = d.getHours() * 60 + d.getMinutes();
+        const ei =
+          new Date(b.fecha_fin).getHours() * 60 +
+          new Date(b.fecha_fin).getMinutes();
+
         if (slotMin >= si && slotMin < ei) libre = false;
       }
     });
