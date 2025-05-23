@@ -58,6 +58,7 @@ export default function AdminBloqueosScreen() {
         fecha_inicio: start.toISOString(),
         fecha_fin: end.toISOString(),
         empleado_id: selectedEmp,
+        cita_id: null,
       });
       Alert.alert("Éxito", "Bloqueo agregado");
     } catch {
