@@ -38,7 +38,7 @@ export const updateDisponibilidadEmpleado = (empleadoId, payload) => {
  */
 
 export const fetchBloqueos = () => {
-  return api.get("/admin/bloqueos-empleados/");
+  return api.get("/admin/bloqueo/");
 };
 
 /**
