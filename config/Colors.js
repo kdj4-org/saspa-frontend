@@ -46,6 +46,10 @@ export const COLORS = {
       hex: "#A9A9A9",
       rgb: "rgb(169, 169, 169)",
     },
+    light: {
+      hex: "#E6E6E6",
+      rgb: "rgb(230, 230, 230)",
+    },
   },
   lavender: {
     light: {

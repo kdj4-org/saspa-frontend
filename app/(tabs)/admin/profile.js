@@ -1,31 +1,30 @@
-import { ScrollView, Text, TouchableOpacity } from "react-native";
+import { ScrollView, Text, StyleSheet } from "react-native";
 import { Screen } from "../../../components/Screen";
-import { useAuth } from "../../../context/authContext";
-import { useRouter } from "expo-router";
+import { COLORS } from "../../../config/Colors";
+import DatesReport from "../../../components/admin/profile/DatesReport";
+import UserHeader from "../../../components/admin/profile/UserHeader";
 
 export default function ProfilePage() {
-  const { logout } = useAuth();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    await logout();
-    router.replace("/login");
-  };
-
   return (
     <Screen>
-      <ScrollView contentContainerStyle={{ padding: 16 }}>
-        <Text className="text-black text-xl font-bold mb-6">Perfil</Text>
-
-        <TouchableOpacity
-          onPress={handleLogout}
-          className="bg-purple-600 py-3 px-4 rounded-md"
-        >
-          <Text className="text-white text-center font-semibold">
-            Cerrar sesión
-          </Text>
-        </TouchableOpacity>
+      <ScrollView contentContainerStyle={styles.container}>
+        <Text style={styles.title}>Perfil</Text>
+        <UserHeader />
+        <DatesReport />
       </ScrollView>
     </Screen>
   );
 }
+
+const styles = StyleSheet.create({
+  container: {
+    padding: 16,
+    paddingBottom: 40,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: COLORS.purple.text.hex,
+    marginBottom: 16,
+  },
+});
