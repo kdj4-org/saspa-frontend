@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -28,6 +28,7 @@ export default function EmpleadosScreen() {
     loading: loadingAllServicios,
     error: errorAllServicios,
   } = useServicios();
+
   const [sorted, setSorted] = useState([]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
@@ -35,6 +36,7 @@ export default function EmpleadosScreen() {
   const [serviciosVinculadosNombres, setServiciosVinculadosNombres] = useState(
     [],
   );
+
   const {
     serviciosVinculados: serviciosVinculadosIds,
     loadingServiciosVinculados,
@@ -60,9 +62,7 @@ export default function EmpleadosScreen() {
     if (serviciosVinculadosIds && allServicios) {
       const nombres = serviciosVinculadosIds
         .map((linkedService) => {
-          const servicio = allServicios.find(
-            (s) => s.id === linkedService.servicioId,
-          );
+          const servicio = allServicios.find((s) => s.id === linkedService.id);
           return servicio ? { id: servicio.id, nombre: servicio.nombre } : null;
         })
         .filter(Boolean);
@@ -94,7 +94,7 @@ export default function EmpleadosScreen() {
       )}
       <View style={styles.info}>
         <Text style={styles.title}>{item.nombre}</Text>
-        <Text>Sede: {item.sede?.barrio ?? "-"}</Text>
+        <Text>Sede: {item.sede ?? "-"}</Text>
         <TouchableOpacity
           style={styles.serviciosButton}
           onPress={() => openServiciosModal(item.id)}
@@ -104,6 +104,9 @@ export default function EmpleadosScreen() {
       </View>
     </View>
   );
+
+  const selectedEmpleado = empleados?.find((e) => e.id === selectedEmpleadoId);
+  const selectedSede = selectedEmpleado?.sede ?? "-";
 
   return (
     <Screen>
@@ -149,9 +152,12 @@ export default function EmpleadosScreen() {
 
       <EmpleadoServiciosModal
         isVisible={modalVisible}
+        empleado={selectedEmpleado}
         onClose={closeServiciosModal}
         servicios={serviciosVinculadosNombres}
         error={errorAllServicios}
+        sede={selectedSede}
+        loading={loadingServiciosVinculados}
       />
     </Screen>
   );
