@@ -19,10 +19,6 @@ export const fetchDates = (estado) => {
   return api.get(`/admin/citas/${params}`);
 };
 
-export const updateAppointmentStatus = (citaId, accion) => {
-  return api.put(`/admin/citas/${citaId}/${accion}/`);
-};
-
 export const updateAppointment = (citaId, data) => {
   return api.put(`/admin/citas/${citaId}/`, data);
 };

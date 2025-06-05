@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import * as dateService from "../services/dates";
 import { print_error } from "../utils/development";
+import { DATE_STATES } from "../config/DateStates";
 
 export const useCitas = (initialEstado) => {
   const [citas, setCitas] = useState([]);
@@ -26,10 +27,9 @@ export const useCitas = (initialEstado) => {
   const approveAppointment = useCallback(
     async (citaId) => {
       try {
-        const response = await dateService.updateAppointmentStatus(
-          citaId,
-          "aprobar",
-        );
+        const response = await dateService.updateAppointment(citaId, {
+          estado: DATE_STATES.APPROVED,
+        });
         await loadCitas(estado);
         return response.data;
       } catch (error) {
@@ -44,10 +44,9 @@ export const useCitas = (initialEstado) => {
   const rejectAppointment = useCallback(
     async (citaId) => {
       try {
-        const response = await dateService.updateAppointmentStatus(
-          citaId,
-          "rechazar",
-        );
+        const response = await dateService.updateAppointment(citaId, {
+          estado: DATE_STATES.REJECTED,
+        });
         await loadCitas(estado);
         return response.data;
       } catch (error) {
@@ -62,10 +61,9 @@ export const useCitas = (initialEstado) => {
   const cancelAppointment = useCallback(
     async (citaId) => {
       try {
-        const response = await dateService.updateAppointmentStatus(
-          citaId,
-          "cancelar",
-        );
+        const response = await dateService.updateAppointment(citaId, {
+          estado: DATE_STATES.CANCELED,
+        });
         await loadCitas(estado);
         return response.data;
       } catch (error) {
@@ -81,7 +79,7 @@ export const useCitas = (initialEstado) => {
     async (citaId) => {
       try {
         const response = await dateService.updateAppointment(citaId, {
-          estado: "terminada",
+          estado: DATE_STATES.FINISHED,
         });
         await loadCitas(estado);
         return response.data;
