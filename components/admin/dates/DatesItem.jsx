@@ -1,29 +1,10 @@
-import { useEffect } from "react";
-import { print_log } from "../../../utils/development";
+import { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../../config/Colors";
+import { DATE_STATES } from "../../../config/DateStates";
+import { DATE_ACTIONS } from "../../../config/DateActions";
 
-const DatesItem = ({ cita, updateEstado }) => {
-  const handleApprove = () => {
-    updateEstado(cita.id, "aprobar");
-  };
-
-  const handleReject = () => {
-    updateEstado(cita.id, "rechazar");
-  };
-
-  const handleCancel = () => {
-    updateEstado(cita.id, "cancelar");
-  };
-
-  const handleFinish = () => {
-    updateEstado(cita.id, "terminada");
-  };
-
-  useEffect(() => {
-    print_log(cita);
-  }, [cita]);
-
+const DatesItem = ({ cita, onApprove, onReject, onCancel, onFinish }) => {
   return (
     <View style={styles.card}>
       <View style={styles.info}>
@@ -35,39 +16,44 @@ const DatesItem = ({ cita, updateEstado }) => {
         <Text style={styles.textRegular}>Sede: {cita.sedeNombre}</Text>
         <Text style={styles.textRegular}>Empleado: {cita.empleadoNombre}</Text>
         <Text style={styles.textRegular}>Estado: {cita.estado}</Text>
+        <Text style={styles.textRegular}>Id Cita: {cita.id}</Text>
       </View>
-      {cita.estado === "en_espera" && (
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.button, styles.approveButton]}
-            onPress={handleApprove}
-          >
-            <Text style={styles.buttonText}>Sí</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.rejectButton]}
-            onPress={handleReject}
-          >
-            <Text style={styles.buttonText}>No</Text>
-          </TouchableOpacity>
-        </View>
-      )}
-      {cita.estado === "aceptada" && (
-        <View style={styles.actions}>
-          <TouchableOpacity
-            style={[styles.button, styles.cancelButton]}
-            onPress={handleCancel}
-          >
-            <Text style={styles.buttonText}>Cancelar</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.finishButton]}
-            onPress={handleFinish}
-          >
-            <Text style={styles.buttonText}>Terminar</Text>
-          </TouchableOpacity>
-        </View>
-      )}
+
+      <View style={styles.actions}>
+        {cita.estado === DATE_STATES.PENDING && (
+          <>
+            <TouchableOpacity
+              style={[styles.button, styles.approveButton]}
+              onPress={onApprove}
+            >
+              <Text style={styles.buttonText}>{DATE_ACTIONS.APPROVE}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.rejectButton]}
+              onPress={onReject}
+            >
+              <Text style={styles.buttonText}>{DATE_ACTIONS.REJECT}</Text>
+            </TouchableOpacity>
+          </>
+        )}
+
+        {cita.estado === DATE_STATES.APPROVED && (
+          <>
+            <TouchableOpacity
+              style={[styles.button, styles.finishButton]}
+              onPress={onFinish}
+            >
+              <Text style={styles.buttonText}>{DATE_ACTIONS.FINISH}</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={[styles.button, styles.cancelButton]}
+              onPress={onCancel}
+            >
+              <Text style={styles.buttonText}>{DATE_ACTIONS.CANCEL}</Text>
+            </TouchableOpacity>
+          </>
+        )}
+      </View>
     </View>
   );
 };
@@ -80,12 +66,17 @@ const styles = StyleSheet.create({
     borderRadius: 5,
     padding: 15,
     marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    flexDirection: "column",
+    alignItems: "left",
+    width: "100%",
   },
-  info: {
-    flex: 1,
+  info: {},
+  actions: {
+    margin: 1,
+    padding: 2,
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
   },
   textBold: {
     fontWeight: "bold",
@@ -96,28 +87,24 @@ const styles = StyleSheet.create({
     marginBottom: 5,
     color: COLORS.gray.dark,
   },
-  actions: {
-    flexDirection: "row",
-  },
   button: {
     borderRadius: 5,
     paddingVertical: 8,
     paddingHorizontal: 12,
-    marginLeft: 10,
-    minWidth: 60,
+    minWidth: 20,
     alignItems: "center",
   },
   approveButton: {
-    backgroundColor: COLORS.yellow.light,
+    backgroundColor: COLORS.purple.dark.hex,
   },
   rejectButton: {
-    backgroundColor: COLORS.red.intense,
+    backgroundColor: COLORS.red.intense.hex,
   },
   cancelButton: {
-    backgroundColor: COLORS.orange.medium,
+    backgroundColor: COLORS.red.intense.hex,
   },
   finishButton: {
-    backgroundColor: COLORS.green.medium,
+    backgroundColor: COLORS.purple.dark.hex,
   },
   buttonText: {
     color: "white",

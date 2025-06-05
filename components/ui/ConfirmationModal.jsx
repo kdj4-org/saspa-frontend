@@ -1,8 +1,14 @@
-import React from "react";
 import { Modal, View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../config/Colors";
 
-const ConfirmationModal = ({ isVisible, onClose, onConfirm, message }) => {
+const ConfirmationModal = ({
+  isVisible,
+  onClose,
+  onConfirm,
+  message,
+  textCancel = "Cancelar",
+  textApprove = "Eliminar",
+}) => {
   return (
     <Modal
       animationType="fade"
@@ -18,13 +24,13 @@ const ConfirmationModal = ({ isVisible, onClose, onConfirm, message }) => {
               style={[styles.button, styles.cancelButton]}
               onPress={onClose}
             >
-              <Text style={styles.textStyle}>Cancelar</Text>
+              <Text style={styles.textStyle}>{textCancel}</Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={[styles.button, styles.confirmButton]}
               onPress={onConfirm}
             >
-              <Text style={styles.textStyle}>Eliminar</Text>
+              <Text style={styles.textStyle}>{textApprove}</Text>
             </TouchableOpacity>
           </View>
         </View>

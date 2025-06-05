@@ -1,9 +1,13 @@
-// components/ui/OperationStatusModal.js
-import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { COLORS } from "../../config/Colors";
 
-const OperationStatusModal = ({ isVisible, onClose, status }) => {
+const OperationStatusModal = ({
+  isVisible,
+  onClose,
+  status,
+  messageFailure = "Operación Fallida",
+  messageSuccess = "Operación Exitosa",
+}) => {
   return (
     <Modal
       transparent
@@ -14,11 +18,7 @@ const OperationStatusModal = ({ isVisible, onClose, status }) => {
       <View style={styles.modalOverlay}>
         <View style={styles.modalContainer}>
           <Text style={styles.modalTitle}>
-            {status === "success"
-              ? "Operación Exitosa"
-              : status === "failure"
-                ? "Operación Fallida"
-                : ""}
+            {status === "success" ? messageSuccess : messageFailure}
           </Text>
           {status === "failure" && (
             <Text style={styles.modalMessage}>Intente nuevamente.</Text>

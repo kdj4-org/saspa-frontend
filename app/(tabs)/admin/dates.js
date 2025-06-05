@@ -15,7 +15,10 @@ import { COLORS } from "../../../config/Colors";
 import { SortAlphaUpIcon, SortAlphaDownIcon } from "../../../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DatesStateFiltersModal from "../../../components/admin/dates/DatesStateFiltersModal";
+import ConfirmationModal from "../../../components/ui/ConfirmationModal";
+import OperationStatusModal from "../../../components/ui/OperationStatusModal";
 import { DATE_STATES } from "../../../config/DateStates";
+import { DATE_ACTIONS } from "../../../config/DateActions";
 
 export default function DatesPage() {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
@@ -23,11 +26,24 @@ export default function DatesPage() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [invertedOrder, setInvertedOrder] = useState(false);
-  const { citas, loadingCitas, errorCitas, updateEstado } =
-    useCitasEnriquecidas();
+  const {
+    citas,
+    loadingCitas,
+    errorCitas,
+    approveAppointment,
+    rejectAppointment,
+    cancelAppointment,
+    finishAppointment,
+  } = useCitasEnriquecidas();
   const [filteredCitas, setFilteredCitas] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersActive, setFiltersActive] = useState(false);
+
+  const [confirmationVisible, setConfirmationVisible] = useState(false);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [status, setStatus] = useState("success");
+  const [pendingAction, setPendingAction] = useState(null);
+  const [actionName, setActionName] = useState("unknownAction");
 
   useEffect(() => {
     applyFilters(citas);
@@ -40,7 +56,6 @@ export default function DatesPage() {
         "Ocurrió un problema al obtener la lista de citas. Por favor, intenta nuevamente más tarde.",
         [{ text: "OK" }],
       );
-      console.error("Error en la carga de citas:", errorCitas);
     }
   }, [errorCitas]);
 
@@ -161,6 +176,30 @@ export default function DatesPage() {
     return "";
   };
 
+  const handleAction = async (actionFn, citaId) => {
+    setConfirmationVisible(false);
+    try {
+      const res = await actionFn(citaId);
+      if (res?.mensaje) {
+        setStatus("success");
+      } else {
+        console.log("error", res);
+        setStatus("failure");
+      }
+    } catch (e) {
+      console.log("error", e);
+      setStatus("failure");
+    } finally {
+      setStatusModalVisible(true);
+    }
+  };
+
+  const confirmAction = (actionFn, citaId, actionName) => {
+    setActionName(actionName);
+    setPendingAction(() => () => handleAction(actionFn, citaId));
+    setConfirmationVisible(true);
+  };
+
   return (
     <Screen>
       <View style={styles.container}>
@@ -242,7 +281,25 @@ export default function DatesPage() {
             data={filteredCitas}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <DatesItem cita={item} updateEstado={updateEstado} />
+              <DatesItem
+                cita={item}
+                onApprove={() =>
+                  confirmAction(
+                    approveAppointment,
+                    item.id.toString(),
+                    DATE_ACTIONS.APPROVE,
+                  )
+                }
+                onReject={() =>
+                  confirmAction(rejectAppointment, item.id, DATE_ACTIONS.REJECT)
+                }
+                onCancel={() =>
+                  confirmAction(cancelAppointment, item.id, DATE_ACTIONS.CANCEL)
+                }
+                onFinish={() =>
+                  confirmAction(finishAppointment, item.id, DATE_ACTIONS.FINISH)
+                }
+              />
             )}
             ListEmptyComponent={
               filtersActive ? (
@@ -255,6 +312,21 @@ export default function DatesPage() {
             }
           />
         )}
+
+        <ConfirmationModal
+          isVisible={confirmationVisible}
+          onClose={() => setConfirmationVisible(false)}
+          onConfirm={pendingAction}
+          textCancel="No ejecutar acción"
+          textApprove="Ejecutar acción"
+          message={`¿Estás seguro de que quieres ${actionName} la cita?`}
+        />
+
+        <OperationStatusModal
+          isVisible={statusModalVisible}
+          onClose={() => setStatusModalVisible(false)}
+          status={status}
+        />
       </View>
     </Screen>
   );
