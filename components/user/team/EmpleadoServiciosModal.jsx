@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect } from "react";
 import {
   Modal,
   View,
@@ -6,10 +6,18 @@ import {
   StyleSheet,
   FlatList,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import { COLORS } from "../../../config/Colors";
 
-const EmpleadoServiciosModal = ({ isVisible, onClose, servicios, error }) => {
+const EmpleadoServiciosModal = ({
+  isVisible,
+  onClose,
+  servicios,
+  error,
+  loading,
+  empleado,
+}) => {
   return (
     <Modal
       transparent
@@ -19,12 +27,17 @@ const EmpleadoServiciosModal = ({ isVisible, onClose, servicios, error }) => {
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
-          <Text style={styles.title}>Servicios Vinculados</Text>
+          <Text style={styles.title}>
+            Servicios Vinculados de {empleado?.nombre}
+          </Text>
+          <Text style={styles.sede}>Sede: {empleado?.sede ?? "-"}</Text>
           {error ? (
             <Text style={styles.error}>
               Hubo un problema al cargar los servicios. Por favor, intenta más
               tarde.
             </Text>
+          ) : loading ? (
+            <ActivityIndicator size="large" color={COLORS.purple.text.hex} />
           ) : servicios && servicios.length > 0 ? (
             <FlatList
               data={servicios}
@@ -63,7 +76,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: "bold",
-    marginBottom: 16,
+    marginBottom: 8,
+    color: COLORS.purple.text.hex,
+    textAlign: "center",
+  },
+  sede: {
+    fontSize: 16,
+    fontWeight: "bold",
+    marginBottom: 8,
     color: COLORS.purple.text.hex,
     textAlign: "center",
   },
