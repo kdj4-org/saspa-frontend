@@ -24,6 +24,8 @@ export default function Register() {
     confirm: "",
   });
   const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleRegister = async () => {
     setErrors({});
@@ -103,23 +105,43 @@ export default function Register() {
         )}
 
         <Text style={styles.subtitle}>Contraseña:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          secureTextEntry
-          value={form.password}
-          onChangeText={(val) => onChange("password", val)}
-        />
+        <View style={styles.input}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Contraseña"
+            secureTextEntry={!showPassword}
+            value={form.password}
+            onChangeText={(val) => onChange("password", val)}
+          />
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Text style={styles.toggleButtonText}>
+              {showPassword ? "Ocultar" : "Mostrar"}
+            </Text>
+          </TouchableOpacity>
+        </View>
         {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
         <Text style={styles.subtitle}>Confirmar contraseña:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Confirmar contraseña"
-          secureTextEntry
-          value={form.confirm}
-          onChangeText={(val) => onChange("confirm", val)}
-        />
+        <View style={styles.input}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Confirmar contraseña"
+            secureTextEntry={!showConfirmPassword}
+            value={form.confirm}
+            onChangeText={(val) => onChange("confirm", val)}
+          />
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+          >
+            <Text style={styles.toggleButtonText}>
+              {showConfirmPassword ? "Ocultar" : "Mostrar"}
+            </Text>
+          </TouchableOpacity>
+        </View>
         {errors.confirm && <Text style={styles.error}>{errors.confirm}</Text>}
 
         <TouchableOpacity style={styles.button} onPress={handleRegister}>
@@ -152,6 +174,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     backgroundColor: "#9F71B3",
     borderColor: "#370E49",
+    flexDirection: "row",
   },
   button: {
     backgroundColor: "#E0B6AB",
@@ -179,5 +202,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#370E49",
     textAlign: "center",
+  },
+  passwordInput: {
+    flex: 1,
+  },
+  toggleButton: {
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  toggleButtonText: {
+    color: "#E0B6AB",
+    fontWeight: "bold",
   },
 });

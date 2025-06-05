@@ -18,6 +18,8 @@ export default function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [errors, setErrors] = useState({});
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const handleLogin = async () => {
     const newErrors = validateLogin(form);
     if (Object.keys(newErrors).length > 0) {
@@ -82,13 +84,23 @@ export default function Login() {
         )}
 
         <Text style={styles.subtitle}>Contraseña:</Text>
-        <TextInput
-          style={styles.input}
-          placeholder="Contraseña"
-          secureTextEntry
-          value={form.password}
-          onChangeText={(val) => onChange("password", val)}
-        />
+        <View style={styles.input}>
+          <TextInput
+            style={styles.passwordInput}
+            placeholder="Contraseña"
+            secureTextEntry={!showPassword}
+            value={form.password}
+            onChangeText={(val) => onChange("password", val)}
+          />
+          <TouchableOpacity
+            style={styles.toggleButton}
+            onPress={() => setShowPassword(!showPassword)}
+          >
+            <Text style={styles.toggleButtonText}>
+              {showPassword ? "Ocultar" : "Mostrar"}
+            </Text>
+          </TouchableOpacity>
+        </View>
         {errors.password && <Text style={styles.error}>{errors.password}</Text>}
 
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
@@ -122,6 +134,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
     backgroundColor: "#9F71B3",
     borderColor: "#370E49",
+    flexDirection: "row",
   },
   button: {
     backgroundColor: "#E0B6AB",
@@ -150,5 +163,17 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     color: "#370E49",
     textAlign: "center",
+  },
+  passwordInput: {
+    flex: 1,
+  },
+  toggleButton: {
+    paddingHorizontal: 12,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  toggleButtonText: {
+    color: "#E0B6AB",
+    fontWeight: "bold",
   },
 });
