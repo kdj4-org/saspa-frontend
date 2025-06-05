@@ -1,5 +1,5 @@
 // src/screens/AdminDisponibilidadScreen.jsx
-import { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -8,11 +8,11 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { COLORS } from "../../../config/Colors";
 import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useDisponibilidad } from "../../../hooks/useDisponibilidad";
 import { Screen } from "../../../components/Screen";
-import { Picker } from "@react-native-picker/picker";
 
 const dias = [
   "lunes",
@@ -32,13 +32,18 @@ const tiempos = Array.from({ length: (18 - 6) * 2 + 1 }, (_, i) => {
 });
 
 export default function AdminDisponibilidadScreen() {
-  const { empleados } = useEmpleados({
-    admin: true,
-  });
+  const { empleados } = useEmpleados({ admin: true });
   const { horarios, actualizarDisponibilidad } = useDisponibilidad();
 
   const [selectedEmp, setSelectedEmp] = useState(null);
 
+  // 1) Extraigo el objeto de disponibilidad para el empleado seleccionado
+  const empHorario = useMemo(
+    () => horarios.find((h) => h.empleado_id === selectedEmp),
+    [horarios, selectedEmp],
+  );
+
+  // 2) Función para crear grid vacío
   const initGrid = useCallback(() => {
     const g = {};
     dias.forEach((d) => {
@@ -51,44 +56,46 @@ export default function AdminDisponibilidadScreen() {
   }, []);
 
   const [grid, setGrid] = useState(initGrid);
-  const [disponibilidadData, setDisponibilidadData] = useState({});
 
+  // 3) Cada vez que empHorario cambie, cargo la grilla
   useEffect(() => {
     const baseGrid = initGrid();
-    if (selectedEmp && horarios) {
-      const empHorario = horarios.find((h) => h.empleado_id === selectedEmp);
-      if (empHorario) {
-        empHorario.disponibilidad.forEach(({ dia, bloques }) => {
-          bloques.forEach(({ hora_inicio, hora_fin }) => {
-            const [hInit, mInit] = hora_inicio.split(":");
-            const [hEnd, mEnd] = hora_fin.split(":");
-            const startMin = parseInt(hInit) * 60 + parseInt(mInit);
-            const endMin = parseInt(hEnd) * 60 + parseInt(mEnd);
-            tiempos.forEach((slot) => {
-              const [hs, ms] = slot.split(":");
-              const slotMin = parseInt(hs) * 60 + parseInt(ms);
-              if (slotMin >= startMin && slotMin < endMin) {
-                baseGrid[dia][slot] = true;
-              }
-            });
+
+    if (empHorario) {
+      empHorario.disponibilidad.forEach(({ dia, bloques }) => {
+        bloques.forEach(({ hora_inicio, hora_fin }) => {
+          const [hInit, mInit] = hora_inicio.split(":").map(Number);
+          const [hEnd, mEnd] = hora_fin.split(":").map(Number);
+          const startMin = hInit * 60 + mInit;
+          const endMin = hEnd * 60 + mEnd;
+
+          tiempos.forEach((slot) => {
+            const [hs, ms] = slot.split(":").map(Number);
+            const slotMin = hs * 60 + ms;
+            if (slotMin >= startMin && slotMin < endMin) {
+              baseGrid[dia][slot] = true;
+            }
           });
         });
-      }
+      });
     }
-    setGrid(baseGrid);
-  }, [selectedEmp, horarios, initGrid]);
 
+    setGrid(baseGrid);
+  }, [empHorario, initGrid]);
+
+  // 4) Reconstruyo disponibilidadData en bloques cuando grid cambie
+  const [disponibilidadData, setDisponibilidadData] = useState({});
   useEffect(() => {
     const nuevos = {};
     dias.forEach((dia) => {
-      const slotsAct = Object.entries(grid[dia] || {})
-        .filter(([_, act]) => act)
+      nuevos[dia] = Object.entries(grid[dia] || {})
+        .filter(([_, activo]) => activo)
         .map(([t]) => t);
-      nuevos[dia] = slotsAct;
     });
     setDisponibilidadData(nuevos);
   }, [grid]);
 
+  // Toggle manual
   const toggleSlot = (dia, slot) => {
     setGrid((prev) => ({
       ...prev,
@@ -96,41 +103,51 @@ export default function AdminDisponibilidadScreen() {
     }));
   };
 
+  // Guardar al backend
   const handleSave = async () => {
     if (!selectedEmp) return;
+    // reconstruyo bloques desde disponibilidadData...
     const bloques = [];
     Object.entries(disponibilidadData).forEach(([dia, slots]) => {
-      if (slots.length) {
-        const mins = slots
-          .map((t) => {
-            const [h, m] = t.split(":");
-            return parseInt(h) * 60 + parseInt(m);
-          })
-          .sort((a, b) => a - b);
-        let start = mins[0];
-        let prev = mins[0];
-        for (let i = 1; i < mins.length; i++) {
-          if (mins[i] === prev + 30) prev = mins[i];
-          else {
-            bloques.push({ dia, hora_inicio: start, hora_fin: prev + 30 });
-            start = mins[i];
-            prev = mins[i];
-          }
+      if (!slots.length) return;
+      const mins = slots
+        .map((t) => {
+          const [h, m] = t.split(":");
+          return parseInt(h) * 60 + parseInt(m);
+        })
+        .sort((a, b) => a - b);
+      let start = mins[0],
+        prev = mins[0];
+      for (let i = 1; i < mins.length; i++) {
+        if (mins[i] === prev + 30) {
+          prev = mins[i];
+        } else {
+          bloques.push({ dia, hora_inicio: start, hora_fin: prev + 30 });
+          start = mins[i];
+          prev = mins[i];
         }
-        bloques.push({ dia, hora_inicio: start, hora_fin: prev + 30 });
       }
+      bloques.push({ dia, hora_inicio: start, hora_fin: prev + 30 });
     });
+
     const payload = {
       disponibilidad: bloques.map(({ dia, hora_inicio, hora_fin }) => ({
         dia,
         bloques: [
           {
-            hora_inicio: `${String(Math.floor(hora_inicio / 60)).padStart(2, "0")}:${String(hora_inicio % 60).padStart(2, "0")}:00`,
-            hora_fin: `${String(Math.floor(hora_fin / 60)).padStart(2, "0")}:${String(hora_fin % 60).padStart(2, "0")}:00`,
+            hora_inicio: `${String(Math.floor(hora_inicio / 60)).padStart(
+              2,
+              "0",
+            )}:${String(hora_inicio % 60).padStart(2, "0")}:00`,
+            hora_fin: `${String(Math.floor(hora_fin / 60)).padStart(
+              2,
+              "0",
+            )}:${String(hora_fin % 60).padStart(2, "0")}:00`,
           },
         ],
       })),
     };
+
     try {
       await actualizarDisponibilidad(selectedEmp, payload);
       Alert.alert("Éxito", "Disponibilidad guardada correctamente.");
@@ -145,7 +162,7 @@ export default function AdminDisponibilidadScreen() {
         <Text style={styles.title}>Seleccionar Empleado</Text>
         <Picker
           selectedValue={selectedEmp}
-          onValueChange={(val) => setSelectedEmp(val)}
+          onValueChange={setSelectedEmp}
           style={styles.picker}
         >
           <Picker.Item label="-- Seleccione --" value={null} />
@@ -157,7 +174,6 @@ export default function AdminDisponibilidadScreen() {
         {selectedEmp && (
           <>
             <Text style={styles.subtitle}>Disponibilidad</Text>
-            {/* Header con días */}
             <View style={styles.gridHeader}>
               <View style={styles.timeCell} />
               {dias.map((d) => (
@@ -166,7 +182,6 @@ export default function AdminDisponibilidadScreen() {
                 </Text>
               ))}
             </View>
-            {/* Filas por hora */}
             {tiempos.map((t) => (
               <View key={t} style={styles.row}>
                 <Text style={styles.timeCell}>{t}</Text>
@@ -175,14 +190,15 @@ export default function AdminDisponibilidadScreen() {
                     key={`${d}-${t}`}
                     style={[
                       styles.slot,
-                      { backgroundColor: grid[d][t] ? "#A8E6CF" : "#FF8C94" },
+                      {
+                        backgroundColor: grid[d][t] ? "#A8E6CF" : "#FF8C94",
+                      },
                     ]}
                     onPress={() => toggleSlot(d, t)}
                   />
                 ))}
               </View>
             ))}
-
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
               <Text style={styles.buttonText}>Guardar Disponibilidad</Text>
             </TouchableOpacity>
@@ -194,14 +210,7 @@ export default function AdminDisponibilidadScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    alignItems: "center",
-  },
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  container: { alignItems: "center" },
   title: {
     fontSize: 20,
     fontWeight: "bold",
@@ -255,8 +264,5 @@ const styles = StyleSheet.create({
     width: "60%",
     alignItems: "center",
   },
-  buttonText: {
-    color: "#fff",
-    fontWeight: "bold",
-  },
+  buttonText: { color: "#fff", fontWeight: "bold" },
 });

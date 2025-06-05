@@ -20,7 +20,9 @@ const CARD_WIDTH = screenWidth * 0.9;
 const CARD_HEIGHT = 240;
 
 export default function EmpleadosScreen() {
-  const { empleados, loading: loadingEmpleados } = useEmpleados();
+  const { empleados, loading: loadingEmpleados } = useEmpleados({
+    admin: false,
+  });
   const {
     servicios: allServicios,
     loading: loadingAllServicios,

@@ -4,6 +4,8 @@ import { datesMock } from "./mocks/datesMocks";
 
 const useMocks = Constants.expoConfig.extra.USE_MOCKS === "true";
 
+// ===== ADMIN =====
+
 export const fetchDates = (estado) => {
   if (useMocks) {
     if (estado) {
@@ -23,4 +25,13 @@ export const updateAppointmentStatus = (citaId, accion) => {
 
 export const updateAppointment = (citaId, data) => {
   return api.put(`/admin/citas/${citaId}/`, data);
+};
+
+// ===== CLIENTE =====
+export const fetchClientDates = (usuarioId) => {
+  return api.get(`/cliente/${usuarioId}/citas/`);
+};
+
+export const createClientAppointment = (usuarioId, data) => {
+  return api.post(`/cliente/${usuarioId}/citas/`, data);
 };

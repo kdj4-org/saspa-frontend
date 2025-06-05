@@ -22,7 +22,7 @@ export function useEmpleados({ admin = false }) {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [admin]);
 
   const crearEmpleado = useCallback(
     async (data) => {
