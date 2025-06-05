@@ -1,6 +1,6 @@
-import React from "react";
 import { Modal, View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { COLORS } from "../../../config/Colors";
+import { DATE_STATES } from "../../../config/DateStates";
 
 const DatesStateFiltersModal = ({
   isVisible,
@@ -34,60 +34,70 @@ const DatesStateFiltersModal = ({
           <TouchableOpacity
             style={[
               styles.filterOption,
-              selectedStatus === "En espera" && styles.activeFilterOption,
+              selectedStatus === DATE_STATES.PENDING &&
+                styles.activeFilterOption,
             ]}
-            onPress={() => handleStatusFilter("En espera")}
+            onPress={() => handleStatusFilter(DATE_STATES.PENDING)}
           >
             <Text style={styles.filterOptionText}>
-              En espera {selectedStatus === "En espera" ? "(Activo)" : ""}
+              En espera{" "}
+              {selectedStatus === DATE_STATES.PENDING ? "(Activo)" : ""}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.filterOption,
-              selectedStatus === "aceptada" && styles.activeFilterOption,
+              selectedStatus === DATE_STATES.APPROVED &&
+                styles.activeFilterOption,
             ]}
-            onPress={() => handleStatusFilter("aceptada")}
+            onPress={() => handleStatusFilter(DATE_STATES.APPROVED)}
           >
             <Text style={styles.filterOptionText}>
-              Aceptada {selectedStatus === "aceptada" ? "(Activo)" : ""}
+              Aceptada{" "}
+              {selectedStatus === DATE_STATES.APPROVED ? "(Activo)" : ""}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.filterOption,
-              selectedStatus === "rechazada" && styles.activeFilterOption,
+              selectedStatus === DATE_STATES.REJECTED &&
+                styles.activeFilterOption,
             ]}
-            onPress={() => handleStatusFilter("rechazada")}
+            onPress={() => handleStatusFilter(DATE_STATES.REJECTED)}
           >
             <Text style={styles.filterOptionText}>
-              Rechazada {selectedStatus === "rechazada" ? "(Activo)" : ""}
+              Rechazada{" "}
+              {selectedStatus === DATE_STATES.REJECTED ? "(Activo)" : ""}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.filterOption,
-              selectedStatus === "cancelada" && styles.activeFilterOption,
+              selectedStatus === DATE_STATES.CANCELED &&
+                styles.activeFilterOption,
             ]}
-            onPress={() => handleStatusFilter("cancelada")}
+            onPress={() => handleStatusFilter(DATE_STATES.CANCELED)}
           >
             <Text style={styles.filterOptionText}>
-              Cancelada {selectedStatus === "cancelada" ? "(Activo)" : ""}
+              Cancelada{" "}
+              {selectedStatus === DATE_STATES.CANCELED ? "(Activo)" : ""}
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
             style={[
               styles.filterOption,
-              selectedStatus === "terminada" && styles.activeFilterOption,
+              selectedStatus === DATE_STATES.FINISHED &&
+                styles.activeFilterOption,
             ]}
-            onPress={() => handleStatusFilter("terminada")}
+            onPress={() => handleStatusFilter(DATE_STATES.FINISHED)}
           >
             <Text style={styles.filterOptionText}>
-              Terminada {selectedStatus === "terminada" ? "(Activo)" : ""}
+              Terminada{" "}
+              {selectedStatus === DATE_STATES.FINISHED ? "(Activo)" : ""}
             </Text>
           </TouchableOpacity>
 

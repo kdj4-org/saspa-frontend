@@ -1,4 +1,5 @@
-import React from "react";
+import { useEffect } from "react";
+import { print_log } from "../../../utils/development";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { COLORS } from "../../../config/Colors";
 
@@ -19,14 +20,21 @@ const DatesItem = ({ cita, updateEstado }) => {
     updateEstado(cita.id, "terminada");
   };
 
+  useEffect(() => {
+    print_log(cita);
+  }, [cita]);
+
   return (
     <View style={styles.card}>
       <View style={styles.info}>
-        <Text style={styles.serviceName}>{cita.servicioNombre}</Text>
-        <Text style={styles.clientName}>{cita.clienteNombre}</Text>
-        <Text style={styles.dateTime}>{`${cita.fecha} / ${cita.hora}`}</Text>
-        <Text style={styles.sede}>{cita.sedeNombre}</Text>
-        <Text style={styles.status}>Estado: {cita.estado}</Text>
+        <Text style={styles.textBold}>{cita.servicioNombre}</Text>
+        <Text style={styles.textRegular}>{cita.clienteNombre}</Text>
+        <Text style={styles.textRegular}>
+          Fecha: {`${cita.fecha} / ${cita.hora}`}
+        </Text>
+        <Text style={styles.textRegular}>Sede: {cita.sedeNombre}</Text>
+        <Text style={styles.textRegular}>Empleado: {cita.empleadoNombre}</Text>
+        <Text style={styles.textRegular}>Estado: {cita.estado}</Text>
       </View>
       {cita.estado === "en_espera" && (
         <View style={styles.actions}>
@@ -79,26 +87,14 @@ const styles = StyleSheet.create({
   info: {
     flex: 1,
   },
-  serviceName: {
+  textBold: {
     fontWeight: "bold",
-    fontSize: 16,
     marginBottom: 5,
     color: COLORS.darkPurple,
   },
-  clientName: {
-    color: COLORS.purple.text.hex,
-    marginBottom: 3,
-  },
-  dateTime: {
+  textRegular: {
+    marginBottom: 5,
     color: COLORS.gray.dark,
-    marginBottom: 3,
-  },
-  sede: {
-    color: COLORS.gray.dark,
-    marginBottom: 3,
-  },
-  status: {
-    color: COLORS.gray.medium,
   },
   actions: {
     flexDirection: "row",

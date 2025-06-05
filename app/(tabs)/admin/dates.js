@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   Text,
   View,
@@ -10,11 +10,12 @@ import {
 } from "react-native";
 import { Screen } from "../../../components/Screen";
 import DatesItem from "../../../components/admin/dates/DatesItem";
-import { useCitas } from "../../../hooks/useCitas";
+import { useCitasEnriquecidas } from "../../../hooks/useCitasEnriquecidas";
 import { COLORS } from "../../../config/Colors";
 import { SortAlphaUpIcon, SortAlphaDownIcon } from "../../../components/Icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import DatesStateFiltersModal from "../../../components/admin/dates/DatesStateFiltersModal";
+import { DATE_STATES } from "../../../config/DateStates";
 
 export default function DatesPage() {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
@@ -22,7 +23,8 @@ export default function DatesPage() {
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
   const [invertedOrder, setInvertedOrder] = useState(false);
-  const { citas, loadingCitas, errorCitas, updateEstado } = useCitas();
+  const { citas, loadingCitas, errorCitas, updateEstado } =
+    useCitasEnriquecidas();
   const [filteredCitas, setFilteredCitas] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [filtersActive, setFiltersActive] = useState(false);
@@ -119,8 +121,7 @@ export default function DatesPage() {
             cita.servicioNombre?.toLowerCase().includes(lowerQuery) ||
             cita.clienteNombre?.toLowerCase().includes(lowerQuery) ||
             cita.empleadoNombre?.toLowerCase().includes(lowerQuery) ||
-            cita.sedeNombre?.toLowerCase().includes(lowerQuery) ||
-            cita.sedeDireccion?.toLowerCase().includes(lowerQuery),
+            cita.sedeNombre?.toLowerCase().includes(lowerQuery),
         );
       }
 
@@ -137,15 +138,15 @@ export default function DatesPage() {
 
   const getStatusText = () => {
     switch (selectedStatus) {
-      case "En espera":
+      case DATE_STATES.PENDING:
         return "(En espera)";
-      case "Aceptada":
+      case DATE_STATES.APPROVED:
         return "(Aceptada)";
-      case "Rechazada":
+      case DATE_STATES.REJECTED:
         return "(Rechazada)";
-      case "Cancelada":
+      case DATE_STATES.CANCELED:
         return "(Cancelada)";
-      case "Terminada":
+      case DATE_STATES.FINISHED:
         return "(Terminada)";
       default:
         return "";
@@ -235,13 +236,11 @@ export default function DatesPage() {
             <Text>Cargando citas...</Text>
           </View>
         ) : errorCitas ? (
-          <View style={styles.errorContainer}>
-            {/* El mensaje de error principal se muestra con Alert */}
-          </View>
+          <View style={styles.errorContainer}></View>
         ) : (
           <FlatList
             data={filteredCitas}
-            keyExtractor={(item) => item.id}
+            keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <DatesItem cita={item} updateEstado={updateEstado} />
             )}
