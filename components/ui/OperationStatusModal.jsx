@@ -7,6 +7,7 @@ const OperationStatusModal = ({
   status,
   messageFailure = "Operación Fallida",
   messageSuccess = "Operación Exitosa",
+  messageSolution = "Intente nuevamente.",
 }) => {
   return (
     <Modal
@@ -21,7 +22,7 @@ const OperationStatusModal = ({
             {status === "success" ? messageSuccess : messageFailure}
           </Text>
           {status === "failure" && (
-            <Text style={styles.modalMessage}>Intente nuevamente.</Text>
+            <Text style={styles.modalMessage}>{messageSolution}</Text>
           )}
           <TouchableOpacity style={styles.modalButton} onPress={onClose}>
             <Text style={styles.modalButtonText}>Cerrar</Text>

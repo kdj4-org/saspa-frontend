@@ -17,8 +17,11 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import DatesStateFiltersModal from "../../../components/admin/dates/DatesStateFiltersModal";
 import ConfirmationModal from "../../../components/ui/ConfirmationModal";
 import OperationStatusModal from "../../../components/ui/OperationStatusModal";
+import LoadingOverlay from "../../../components/ui/LoadingOverlay";
 import { DATE_STATES } from "../../../config/DateStates";
 import { DATE_ACTIONS } from "../../../config/DateActions";
+import { useFocusEffect } from "@react-navigation/native";
+import { print_error } from "../../../utils/development";
 
 export default function DatesPage() {
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
@@ -34,6 +37,7 @@ export default function DatesPage() {
     rejectAppointment,
     cancelAppointment,
     finishAppointment,
+    updateEstado,
   } = useCitasEnriquecidas();
   const [filteredCitas, setFilteredCitas] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +47,15 @@ export default function DatesPage() {
   const [statusModalVisible, setStatusModalVisible] = useState(false);
   const [status, setStatus] = useState("success");
   const [pendingAction, setPendingAction] = useState(null);
-  const [actionName, setActionName] = useState("unknownAction");
+  const [actionName, setActionName] = useState("acción");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [isOperating, setIsOperating] = useState(false);
+
+  useFocusEffect(
+    useCallback(() => {
+      updateEstado(selectedStatus);
+    }, [selectedStatus]),
+  );
 
   useEffect(() => {
     applyFilters(citas);
@@ -51,11 +63,7 @@ export default function DatesPage() {
 
   useEffect(() => {
     if (errorCitas) {
-      Alert.alert(
-        "Error al cargar las citas",
-        "Ocurrió un problema al obtener la lista de citas. Por favor, intenta nuevamente más tarde.",
-        [{ text: "OK" }],
-      );
+      print_error("Ha ocurrido un error al cargar las citas", errorCitas);
     }
   }, [errorCitas]);
 
@@ -178,24 +186,29 @@ export default function DatesPage() {
 
   const handleAction = async (actionFn, citaId) => {
     setConfirmationVisible(false);
+    setIsOperating(true);
     try {
       const res = await actionFn(citaId);
       if (res?.mensaje) {
         setStatus("success");
+        setErrorMessage("");
       } else {
-        console.log("error", res);
         setStatus("failure");
+        setErrorMessage("No se pudo ejecutar la operación.");
       }
-    } catch (e) {
-      console.log("error", e);
+    } catch (error) {
       setStatus("failure");
+      setErrorMessage(
+        error.response?.data?.error || "Error desconocido, intente nuevamente.",
+      );
     } finally {
+      setIsOperating(false);
       setStatusModalVisible(true);
     }
   };
 
-  const confirmAction = (actionFn, citaId, actionName) => {
-    setActionName(actionName);
+  const confirmAction = (actionFn, citaId, actionLabel) => {
+    setActionName(actionLabel);
     setPendingAction(() => () => handleAction(actionFn, citaId));
     setConfirmationVisible(true);
   };
@@ -240,9 +253,7 @@ export default function DatesPage() {
               Fecha {getFormattedDate()}
             </Text>
           </TouchableOpacity>
-          {(selectedStatus !== "" ||
-            selectedDate !== null ||
-            searchQuery !== "") && (
+          {(selectedStatus || selectedDate || searchQuery) && (
             <TouchableOpacity
               onPress={clearFilters}
               style={styles.clearFiltersButton}
@@ -274,8 +285,6 @@ export default function DatesPage() {
           <View style={styles.loadingContainer}>
             <Text>Cargando citas...</Text>
           </View>
-        ) : errorCitas ? (
-          <View style={styles.errorContainer}></View>
         ) : (
           <FlatList
             data={filteredCitas}
@@ -286,7 +295,7 @@ export default function DatesPage() {
                 onApprove={() =>
                   confirmAction(
                     approveAppointment,
-                    item.id.toString(),
+                    item.id,
                     DATE_ACTIONS.APPROVE,
                   )
                 }
@@ -326,7 +335,11 @@ export default function DatesPage() {
           isVisible={statusModalVisible}
           onClose={() => setStatusModalVisible(false)}
           status={status}
+          messageFailure={errorMessage}
+          messageSolution={""}
         />
+
+        <LoadingOverlay isVisible={isOperating} />
       </View>
     </Screen>
   );
