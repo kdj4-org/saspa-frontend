@@ -73,8 +73,10 @@ export default function AdminDisponibilidadFinalScreen() {
     const slotMin = hs * 60 + ms;
     let libre = false;
     bloquesDia.forEach((b) => {
-      const si = parseInt(b.hora_inicio.split(":")[0]) * 60;
-      const ei = parseInt(b.hora_fin.split(":")[0]) * 60;
+      const [hiH, hiM] = b.hora_inicio.split(":").map(Number);
+      const [hfH, hfM] = b.hora_fin.split(":").map(Number);
+      const si = hiH * 60 + hiM;
+      const ei = hfH * 60 + hfM;
       if (slotMin >= si && slotMin < ei) libre = true;
     });
     if (!libre) return false;

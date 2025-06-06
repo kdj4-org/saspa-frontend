@@ -14,6 +14,7 @@ import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useDisponibilidad } from "../../../hooks/useDisponibilidad";
 import { Screen } from "../../../components/Screen";
 import { COLORS } from "../../../config/Colors";
+import timeToLocalISOString from "../../../utils/timeToLocalISOString";
 
 // Horas de 6:00 a 18:00 en intervalos de 30 minutos
 const horasDisponibles = Array.from({ length: (18.5 - 6) * 2 }, (_, i) => {
@@ -29,7 +30,13 @@ export default function AdminBloqueosScreen() {
   });
 
   // Desestructurar loadingBloqueos correctamente
-  const { bloqueos, crearBloqueo, deleteBloqueo } = useDisponibilidad();
+  const {
+    bloqueos,
+    crearBloqueo,
+    deleteBloqueo,
+    loadBloqueos,
+    loadingBloqueos,
+  } = useDisponibilidad();
 
   const [selectedEmp, setSelectedEmp] = useState(null);
   const [fecha, setFecha] = useState(new Date());
@@ -55,12 +62,13 @@ export default function AdminBloqueosScreen() {
     end.setHours(hF, mF);
     try {
       await crearBloqueo({
-        fecha_inicio: start.toISOString(),
-        fecha_fin: end.toISOString(),
+        fecha_inicio: timeToLocalISOString(start),
+        fecha_fin: timeToLocalISOString(end),
         empleado_id: selectedEmp,
         cita_id: null,
       });
       Alert.alert("Éxito", "Bloqueo agregado");
+      await loadBloqueos();
     } catch {
       Alert.alert("Error", "No se pudo agregar bloqueo");
     }
@@ -82,6 +90,7 @@ export default function AdminBloqueosScreen() {
             try {
               await deleteBloqueo(id);
               Alert.alert("Éxito", "Bloqueo eliminado");
+              await loadBloqueos();
             } catch {
               Alert.alert("Error", "No se pudo eliminar bloqueo");
             }
@@ -91,6 +100,14 @@ export default function AdminBloqueosScreen() {
       { cancelable: true },
     );
   };
+
+  if (loadingBloqueos) {
+    return (
+      <View style={styles.center}>
+        <Text style={styles.loadingText}>Cargando datos...</Text>
+      </View>
+    );
+  }
 
   return (
     <Screen>
@@ -183,6 +200,11 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: COLORS.purple.background.hex,
+  },
+  loadingText: {
+    fontSize: 16,
+    color: COLORS.purple.text.hex,
   },
   title: {
     fontSize: 20,

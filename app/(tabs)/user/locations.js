@@ -15,7 +15,7 @@ import { COLORS } from "../../../config/Colors";
 
 const { width: screenWidth } = Dimensions.get("window");
 const CARD_WIDTH = screenWidth * 0.9;
-const CARD_HEIGHT = 180;
+const CARD_HEIGHT = 230;
 
 export default function SedesScreen() {
   const { sedes, loading } = useSedes();

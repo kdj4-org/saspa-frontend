@@ -1,4 +1,5 @@
 // components/admin/sedes/AdminSedesPage.js
+
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -10,6 +11,7 @@ import {
   Alert,
 } from "react-native";
 import { useSedes } from "../../../hooks/useSedes";
+import { useEmpleados } from "../../../hooks/useEmpleados";
 import AdminSedeItem from "./AdminSedeItem";
 import AdminSedeModal from "./AdminSedeModal";
 import ConfirmationModal from "../../ui/ConfirmationModal";
@@ -17,6 +19,7 @@ import { COLORS } from "../../../config/Colors";
 
 const AdminSedesPage = () => {
   const { sedes, loading, crearSede, editarSede, eliminarSede } = useSedes();
+  const { empleados } = useEmpleados({ admin: true });
   const [filtered, setFiltered] = useState([]);
   const [search, setSearch] = useState("");
   const [modalVisible, setModalVisible] = useState(false);
@@ -31,6 +34,7 @@ const AdminSedesPage = () => {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [toDelete, setToDelete] = useState(null);
 
+  // Filtra sedes según búsqueda por barrio
   useEffect(() => {
     setFiltered(
       sedes.filter((s) =>
@@ -39,9 +43,11 @@ const AdminSedesPage = () => {
     );
   }, [search, sedes]);
 
+  // Cuando cambia “selected”, precarga el formulario
   useEffect(() => {
-    if (selected) setForm({ ...selected });
-    else
+    if (selected) {
+      setForm({ ...selected });
+    } else {
       setForm({
         direccion: "",
         barrio: "",
@@ -49,10 +55,11 @@ const AdminSedesPage = () => {
         horario: "",
         url_imagen: null,
       });
+    }
   }, [selected]);
 
-  const openModal = (s) => {
-    setSelected(s || null);
+  const openModal = (sede) => {
+    setSelected(sede || null);
     setModalVisible(true);
   };
   const closeModal = () => {
@@ -78,25 +85,36 @@ const AdminSedesPage = () => {
       }
       closeModal();
     } catch (err) {
-      Alert.alert("Error", "Ocurrió un problema.");
+      Alert.alert("Error", "Ocurrió un problema al guardar.");
     }
   };
 
+  // Antes de eliminar, comprueba si hay empleados con esta sede
   const confirmDelete = (id) => {
+    // Filtrar empleados cuyo campo `sede_id` coincida con esta sede
+    const vinculados = empleados.filter((emp) => emp.sede_id === id);
+    if (vinculados.length > 0) {
+      Alert.alert(
+        "No permitido",
+        "No se puede eliminar esta sede porque hay empleados asignados.",
+      );
+      return;
+    }
     setToDelete(id);
     setConfirmVisible(true);
   };
+
   const doDelete = async () => {
     setConfirmVisible(false);
     try {
       await eliminarSede(toDelete);
       Alert.alert("Éxito", "Sede eliminada.");
     } catch {
-      Alert.alert("Error", "No se pudo eliminar.");
+      Alert.alert("Error", "No se pudo eliminar la sede.");
     }
   };
 
-  const onChange = (k, v) => setForm((f) => ({ ...f, [k]: v }));
+  const onChange = (key, value) => setForm((f) => ({ ...f, [key]: value }));
 
   return (
     <View style={styles.container}>
@@ -123,7 +141,7 @@ const AdminSedesPage = () => {
             <AdminSedeItem
               item={item}
               onEdit={() => openModal(item)}
-              onDelete={confirmDelete}
+              onDelete={() => confirmDelete(item.id)}
             />
           )}
         />
