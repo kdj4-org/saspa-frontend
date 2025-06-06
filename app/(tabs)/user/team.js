@@ -14,13 +14,18 @@ import { useEmpleadosServicios } from "../../../hooks/useEmpleadosServicios";
 import { useServicios } from "../../../hooks/useServicios";
 import { COLORS } from "../../../config/Colors";
 import EmpleadoServiciosModal from "../../../components/user/team/EmpleadoServiciosModal";
+import { useFocusEffect } from "expo-router";
 
 const { width: screenWidth } = Dimensions.get("window");
 const CARD_WIDTH = screenWidth * 0.9;
 const CARD_HEIGHT = 240;
 
 export default function EmpleadosScreen() {
-  const { empleados, loading: loadingEmpleados } = useEmpleados({
+  const {
+    empleados,
+    loading: loadingEmpleados,
+    loadEmpleados,
+  } = useEmpleados({
     admin: false,
   });
   const {
@@ -71,6 +76,12 @@ export default function EmpleadosScreen() {
       setServiciosVinculadosNombres([]);
     }
   }, [serviciosVinculadosIds, allServicios]);
+
+  useFocusEffect(
+    useCallback(() => {
+      loadEmpleados();
+    }, [loadEmpleados]),
+  );
 
   const openImage = useCallback((url) => setSelectedImage(url), []);
   const closeImage = useCallback(() => setSelectedImage(null), []);
