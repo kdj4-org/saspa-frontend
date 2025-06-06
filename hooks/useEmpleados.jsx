@@ -72,5 +72,6 @@ export function useEmpleados({ admin = false }) {
     crearEmpleado,
     editarEmpleado,
     eliminarEmpleado,
+    loadEmpleados: load,
   };
 }
