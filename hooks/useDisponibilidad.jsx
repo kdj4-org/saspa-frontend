@@ -105,7 +105,9 @@ export function useDisponibilidad() {
     error,
     crearDisponibilidad,
     actualizarDisponibilidad,
+    loadHorarios,
     crearBloqueo,
     deleteBloqueo,
+    loadBloqueos,
   };
 }
