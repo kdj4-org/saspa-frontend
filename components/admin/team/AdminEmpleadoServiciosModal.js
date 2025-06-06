@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Modal, View, Text, StyleSheet, FlatList, Alert } from "react-native";
 import { useServicios } from "../../../hooks/useServicios";
 import { useEmpleadosServicios } from "../../../hooks/useEmpleadosServicios";
+import { useEmpleados } from "../../../hooks/useEmpleados";
 import ModalTitle from "../../ui/ModalTitle";
 import SelectableListItem from "../../ui/SelectableListItem";
 import ModalButtons from "../../ui/ModalButtons";
@@ -22,6 +23,7 @@ const AdminEmpleadoServiciosModal = ({
     desvincularServicioEmpleado,
     initialServiciosIds,
   } = useEmpleadosServicios(empleadoId);
+  const { loadEmpleados } = useEmpleados({ admin: false });
 
   const [selectedServicios, setSelectedServicios] = useState([]);
   const [isSaving, setIsSaving] = useState(false);
@@ -96,6 +98,7 @@ const AdminEmpleadoServiciosModal = ({
 
     if (operationSuccess) {
       onClose("success");
+      await loadEmpleados();
     } else if (errorMessage) {
       onClose("failure");
     }
