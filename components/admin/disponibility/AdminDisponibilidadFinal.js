@@ -1,5 +1,5 @@
 // src/screens/AdminDisponibilidadFinalScreen.jsx
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useCallback } from "react";
 import {
   View,
   Text,
@@ -12,6 +12,7 @@ import { addWeeks, format, startOfWeek, addDays } from "date-fns";
 import { COLORS } from "../../../config/Colors";
 import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useDisponibilidad } from "../../../hooks/useDisponibilidad";
+import { useFocusEffect } from "@react-navigation/native";
 
 const diasKey = [
   "lunes",
@@ -35,7 +36,14 @@ const tiempos = Array.from({ length: (18 - 6) * 2 + 1 }, (_, i) => {
 
 export default function AdminDisponibilidadFinalScreen() {
   const { empleados } = useEmpleados({ admin: true });
-  const { horarios, bloqueos } = useDisponibilidad();
+  const {
+    horarios,
+    bloqueos,
+    loadBloqueos,
+    loadingBloqueos,
+    loadHorarios,
+    loading,
+  } = useDisponibilidad();
   const [empleadoId, setEmpleadoId] = useState(null);
   const [semanaRef, setSemanaRef] = useState(new Date());
 
@@ -43,6 +51,13 @@ export default function AdminDisponibilidadFinalScreen() {
     () => startOfWeek(semanaRef, { weekStartsOn: 1 }),
     [semanaRef],
   );
+
+  const loadData = useCallback(() => {
+    loadHorarios();
+    loadBloqueos();
+  }, [loadHorarios, loadBloqueos]);
+
+  useFocusEffect(loadData);
 
   // Filtrar por empleado
   const disp = useMemo(
