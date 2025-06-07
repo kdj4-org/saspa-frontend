@@ -9,6 +9,7 @@ import {
   Alert,
   ScrollView,
 } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useServicios } from "../../../hooks/useServicios";
 import { useEmpleados } from "../../../hooks/useEmpleados";
 import { useSedes } from "../../../hooks/useSedes";
@@ -34,9 +35,22 @@ export default function ClienteCitasScreen() {
   });
   const { sedes, loading: loadingSedes } = useSedes();
   // El hook useDisponibilidad entrega { horarios, bloqueos, loading, … }
-  const { horarios, bloqueos, loading: loadingDisp } = useDisponibilidad();
+  const {
+    horarios,
+    bloqueos,
+    loading: loadingDisp,
+    loadingBloqueos,
+    loadBloqueos,
+    loadHorarios,
+  } = useDisponibilidad();
   const { crearCitaCliente } = useCitasCliente(usuarioId);
 
+  const loadData = useCallback(() => {
+    loadHorarios();
+    loadBloqueos();
+  }, [loadHorarios, loadBloqueos]);
+
+  useFocusEffect(loadData);
   //
   // 1) Estado centralizado: arreglo de “filas” de cita
   //    Cada objeto dentro de `entries` tendrá:
@@ -144,6 +158,7 @@ export default function ClienteCitasScreen() {
     loadingEmpleados ||
     loadingSedes ||
     loadingDisp ||
+    loadingBloqueos ||
     !usuarioId
   ) {
     return (
